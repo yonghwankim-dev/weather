@@ -11,6 +11,6 @@ public class WeatherService {
 	private final WeatherWebClient client;
 
 	public String fetchWeatherByCity(String city) {
-		return client.fetchWeatherByCity(city);
+		return client.fetchWeatherByCity(city).block();
 	}
 }

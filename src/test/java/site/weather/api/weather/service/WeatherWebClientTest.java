@@ -1,7 +1,5 @@
 package site.weather.api.weather.service;
 
-import static org.assertj.core.api.Assertions.*;
-
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +11,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 @SpringBootTest
 class WeatherWebClientTest {
@@ -47,8 +47,10 @@ class WeatherWebClientTest {
 
 		String city = "Seoul";
 		// when
-		String json = client.fetchWeatherByCity(city);
+		Mono<String> source = client.fetchWeatherByCity(city);
 		// then
-		assertThat(json).isEqualTo("ok");
+		StepVerifier.create(source)
+			.expectNext("ok")
+			.verifyComplete();
 	}
 }

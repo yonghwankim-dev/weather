@@ -2,6 +2,7 @@ package site.weather.api.weather.service;
 
 import org.springframework.web.reactive.function.client.WebClient;
 
+import reactor.core.publisher.Mono;
 import site.weather.api.weather.domain.Units;
 
 public class WeatherWebClient {
@@ -13,7 +14,7 @@ public class WeatherWebClient {
 		this.appid = appid;
 	}
 
-	public String fetchWeatherByCity(String city) {
+	public Mono<String> fetchWeatherByCity(String city) {
 		return webClient.get()
 			.uri(uriBuilder -> uriBuilder
 				.path("/data/2.5/weather")
@@ -23,7 +24,6 @@ public class WeatherWebClient {
 				.build())
 			.retrieve()
 			.bodyToMono(String.class)
-			.log()
-			.block();
+			.log();
 	}
 }
