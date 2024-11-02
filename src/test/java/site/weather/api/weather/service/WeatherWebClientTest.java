@@ -38,8 +38,8 @@ class WeatherWebClientTest {
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	private static String getWeatherJson(String path) {
-		ClassPathResource resource = new ClassPathResource(path);
+	private static String getWeatherJson() {
+		ClassPathResource resource = new ClassPathResource("weather.json");
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(resource.getInputStream()))) {
 			return br.lines()
 				.collect(Collectors.joining());
@@ -72,7 +72,7 @@ class WeatherWebClientTest {
 		MockResponse mockResponse = new MockResponse()
 			.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
 			.setResponseCode(200)
-			.setBody(getWeatherJson("weather.json"));
+			.setBody(getWeatherJson());
 		mockWebServer.enqueue(mockResponse);
 
 		String city = "Seoul";
