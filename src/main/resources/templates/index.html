@@ -93,25 +93,21 @@
 
 <script>
     async function getWeather() {
-        const city = document.getElementById("city").value;
-        const resultDiv = document.getElementById("result");
 
-        try {
-            // API 호출
-            const response = await fetch(`/api/weather?city=${encodeURIComponent(city)}`);
+        const city = document.querySelector("#city").value;
+        const resultDiv = document.querySelector("#result");
 
-            if (!response.ok) {
-                alert('Failed to fetch weather data');
-                return;
-            }
+        // API 호출
+        const response = await fetch(`/api/weather?city=${encodeURIComponent(city)}`);
 
-            const data = await response.json();
-
-            // 온도 정보를 표시
-            resultDiv.innerHTML = `<p>City: ${data.name}</p><p>Temperature: ${data.temperature}°C</p>`;
-        } catch (error) {
+        if (!response.ok) {
             resultDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
         }
+
+        const data = await response.json();
+
+        // 온도 정보를 표시
+        resultDiv.innerHTML = `<p>City: ${data.name}</p><p>Temperature: ${data.temperature}°C</p>`;
     }
 </script>
 
