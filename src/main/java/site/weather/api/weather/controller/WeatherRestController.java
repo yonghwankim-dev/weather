@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
+import site.weather.api.weather.dto.response.WeatherResponse;
 import site.weather.api.weather.service.WeatherService;
 
 @RestController
@@ -17,8 +18,8 @@ public class WeatherRestController {
 	private final WeatherService service;
 
 	@GetMapping
-	public ResponseEntity<String> getWeather(@RequestParam String city) {
-		String json = service.fetchWeatherByCity(city);
-		return ResponseEntity.ok(json);
+	public ResponseEntity<WeatherResponse> getWeather(@RequestParam String city) {
+		WeatherResponse response = service.fetchWeatherByCity(city);
+		return ResponseEntity.ok(response);
 	}
 }
