@@ -23,6 +23,7 @@ public class WeatherWebClient {
 				.build())
 			.retrieve()
 			.bodyToMono(String.class)
+			.log()
 			.block();
 	}
 }
