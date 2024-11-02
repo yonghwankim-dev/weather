@@ -4,6 +4,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import reactor.core.publisher.Mono;
 import site.weather.api.weather.domain.Units;
+import site.weather.api.weather.dto.response.WeatherResponse;
 
 public class WeatherWebClient {
 	private final WebClient webClient;
@@ -14,7 +15,7 @@ public class WeatherWebClient {
 		this.appid = appid;
 	}
 
-	public Mono<String> fetchWeatherByCity(String city) {
+	public Mono<WeatherResponse> fetchWeatherByCity(String city) {
 		return webClient.get()
 			.uri(uriBuilder -> uriBuilder
 				.path("/data/2.5/weather")
@@ -23,7 +24,7 @@ public class WeatherWebClient {
 				.queryParam("units", Units.METRIC)
 				.build())
 			.retrieve()
-			.bodyToMono(String.class)
+			.bodyToMono(WeatherResponse.class)
 			.log();
 	}
 }
