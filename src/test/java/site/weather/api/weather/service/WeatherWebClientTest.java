@@ -8,12 +8,17 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -29,6 +34,9 @@ class WeatherWebClientTest {
 
 	@Value("${weather.appid}")
 	private String appid;
+
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	private static String getWeatherJson(String path) {
 		ClassPathResource resource = new ClassPathResource(path);
@@ -50,6 +58,10 @@ class WeatherWebClientTest {
 		}
 		this.client = new WeatherWebClient(WebClient.builder()
 			.baseUrl(mockWebServer.url("/").toString())
+			.codecs(configurer -> {
+				configurer.defaultCodecs().jackson2JsonEncoder(new Jackson2JsonEncoder(objectMapper));
+				configurer.defaultCodecs().jackson2JsonDecoder(new Jackson2JsonDecoder(objectMapper));
+			})
 			.build(), appid);
 	}
 
@@ -67,7 +79,7 @@ class WeatherWebClientTest {
 		// when
 		Mono<WeatherResponse> source = client.fetchWeatherByCity(city);
 		// then
-		WeatherResponse expected = new WeatherResponse("Seoul");
+		WeatherResponse expected = new WeatherResponse("Seoul", 24.66);
 		StepVerifier.create(source)
 			.expectNext(expected)
 			.verifyComplete();
