@@ -1,1 +1,6 @@
-spring.application.name=weather
+spring:
+  application:
+    name: weather
+  config:
+    import:
+      - ./secret/application-secret.yml
