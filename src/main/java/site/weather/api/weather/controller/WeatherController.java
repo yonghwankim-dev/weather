@@ -3,7 +3,6 @@ package site.weather.api.weather.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -31,14 +30,17 @@ public class WeatherController {
 
 	private final SimpMessagingTemplate messagingTemplate;
 
-	// 도시별 세션 ID 컬렉션
-	private final Map<String, Set<String>> subscribersSessionId = new ConcurrentHashMap<>();
+	// 도시별 구독 정보
 	private final Map<String, WeatherSubscriptionInfo> weatherSubscriptionInfoMap = new ConcurrentHashMap<>();
 
 	@MessageMapping("/weather")
 	public void subscribeWeather(String city) {
 		if (weatherSubscriptionInfoMap.containsKey(city)) {
-			weatherSubscriptionInfoMap.get(city).sendMessage(messagingTemplate, city);
+			if (weatherSubscriptionInfoMap.get(city).hasWeatherResponse()) {
+				weatherSubscriptionInfoMap.get(city).sendMessage(messagingTemplate, city);
+			} else {
+				fetchWeatherByCity(city);
+			}
 		} else {
 			fetchWeatherByCity(city);
 		}
@@ -60,7 +62,7 @@ public class WeatherController {
 
 	@Scheduled(fixedRate = 30, timeUnit = TimeUnit.SECONDS)
 	public void fetchAndBroadcastByCity() {
-		subscribersSessionId.keySet().forEach(this::fetchWeatherByCity);
+		weatherSubscriptionInfoMap.keySet().forEach(this::fetchWeatherByCity);
 	}
 
 	@EventListener
@@ -74,8 +76,9 @@ public class WeatherController {
 		String[] parts = destination.split("/");
 		String city = parts[parts.length - 1];
 		// subscribersSessionId에 도시가 없는 경우 새로운 HashSet을 추가
-		subscribersSessionId.computeIfAbsent(city, k -> ConcurrentHashMap.newKeySet()).add(sessionId);
-		log.info("subscribersSessionId: {}", subscribersSessionId);
+		weatherSubscriptionInfoMap.computeIfAbsent(city, k -> new WeatherSubscriptionInfo())
+			.addSessionId(sessionId);
+		log.info("weatherSubscriptionInfoMap: {}", weatherSubscriptionInfoMap);
 	}
 
 	@EventListener
@@ -84,16 +87,16 @@ public class WeatherController {
 		List<String> citiesToRemove = new ArrayList<>();
 
 		// 도시별로 sessionId를 제거하고 제거한 Set이 비어있으면 삭제 목록에 추가
-		subscribersSessionId.forEach((city, sessionIdSet) -> {
-			sessionIdSet.remove(sessionId);
-			if (sessionIdSet.isEmpty()) {
+		weatherSubscriptionInfoMap.forEach((city, weatherSubscriptionInfo) -> {
+			weatherSubscriptionInfo.removeSessionId(sessionId);
+			if (weatherSubscriptionInfo.isEmptySessionIds()) {
 				citiesToRemove.add(city);
 			}
 		});
 
 		// 삭제할 도시 목록에서 제거 작업 수행
 		citiesToRemove.forEach(city -> {
-			subscribersSessionId.remove(city);
+			weatherSubscriptionInfoMap.remove(city);
 			log.info("remove the city " + city);
 		});
 	}
