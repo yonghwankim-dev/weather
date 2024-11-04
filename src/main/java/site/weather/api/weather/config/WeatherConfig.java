@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -19,6 +20,7 @@ import site.weather.api.weather.service.WeatherWebClient;
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSocketMessageBroker
+@EnableScheduling
 public class WeatherConfig implements WebSocketMessageBrokerConfigurer {
 
 	private final ObjectMapper objectMapper;
