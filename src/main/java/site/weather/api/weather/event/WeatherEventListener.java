@@ -10,14 +10,14 @@ import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import site.weather.api.weather.repository.WeatherSubscriptionInfoRepository;
+import site.weather.api.weather.service.WeatherService;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class WeatherEventListener {
 
-	private final WeatherSubscriptionInfoRepository repository;
+	private final WeatherService service;
 
 	@EventListener
 	public void handleStompConnectedHandler(SessionSubscribeEvent event) {
@@ -26,21 +26,17 @@ public class WeatherEventListener {
 
 		parseCityFrom(destination).ifPresent(city -> {
 			String sessionId = headerAccessor.getSessionId();
-			repository.addSessionId(city, sessionId);
+			service.addSessionId(city, sessionId);
 		});
 	}
 
 	private Optional<String> parseCityFrom(String destination) {
-		if (destination == null) {
-			return Optional.empty();
-		}
-		final String DESTINATION_SPLITTER = "/";
-		String[] parts = destination.split(DESTINATION_SPLITTER);
-		return Optional.of(parts[parts.length - 1]);
+		return Optional.ofNullable(destination)
+			.map(dst -> dst.substring(dst.lastIndexOf("/") + 1));
 	}
 
 	@EventListener
 	public void handleStompDisconnectedHandler(SessionDisconnectEvent event) {
-		repository.removeCityIfNoSubscribers(event.getSessionId());
+		service.removeCityIfNoSubscribers(event.getSessionId());
 	}
 }
