@@ -19,7 +19,7 @@ public class MemoryWeatherSubscriptionInfoRepository implements WeatherSubscript
 	private final Map<String, WeatherSubscriptionInfo> weatherSubscriptionInfoMap = new ConcurrentHashMap<>();
 
 	@Override
-	public WeatherSubscriptionInfo subscribeWeather(String city) {
+	public WeatherSubscriptionInfo computeIfAbsent(String city) {
 		return weatherSubscriptionInfoMap.computeIfAbsent(city, key -> new WeatherSubscriptionInfo());
 	}
 

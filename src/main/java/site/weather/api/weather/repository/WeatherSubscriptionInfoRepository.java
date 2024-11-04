@@ -6,7 +6,7 @@ import site.weather.api.weather.domain.WeatherSubscriptionInfo;
 import site.weather.api.weather.dto.response.WeatherResponse;
 
 public interface WeatherSubscriptionInfoRepository {
-	WeatherSubscriptionInfo subscribeWeather(String city);
+	WeatherSubscriptionInfo computeIfAbsent(String city);
 
 	void addSessionId(String city, String sessionId);
 

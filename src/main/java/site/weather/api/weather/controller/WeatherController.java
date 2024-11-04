@@ -9,7 +9,6 @@ import org.springframework.stereotype.Controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import site.weather.api.weather.domain.WeatherSubscriptionInfo;
 import site.weather.api.weather.repository.WeatherSubscriptionInfoRepository;
 import site.weather.api.weather.service.WeatherService;
 
@@ -24,8 +23,7 @@ public class WeatherController {
 
 	@MessageMapping("/weather")
 	public void subscribeWeather(String city) {
-		WeatherSubscriptionInfo weatherSubscriptionInfo = repository.subscribeWeather(city);
-		weatherSubscriptionInfo.sendOrFetchWeather(messagingTemplate, city, service::subscribeWeatherByCity);
+		repository.computeIfAbsent(city).sendOrFetchWeather(messagingTemplate, city, service::subscribeWeatherByCity);
 	}
 
 	@Scheduled(fixedRate = 30, timeUnit = TimeUnit.SECONDS)
