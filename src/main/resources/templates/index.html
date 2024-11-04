@@ -97,9 +97,10 @@
     async function getWeather() {
         const socket = new SockJS('/ws/weather');
         const stompClient = Stomp.over(socket);
+        const city = document.querySelector("#city").value;
 
         stompClient.connect({}, () => {
-            stompClient.subscribe('/topic/weather', (message) => {
+            stompClient.subscribe('/topic/weather/' + city, (message) => {
                 const weatherData = JSON.parse(message.body);
                 document.querySelector("#result").innerHTML = `
                 <p>City: ${weatherData.name}</p>
@@ -107,7 +108,7 @@
             });
 
             // 특정 도시를 구독
-            stompClient.send("/app/weather", {}, "Seoul");
+            stompClient.send("/app/weather", {}, city);
         });
     }
 </script>
