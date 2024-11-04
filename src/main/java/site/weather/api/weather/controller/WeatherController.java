@@ -23,7 +23,7 @@ public class WeatherController {
 
 	@MessageMapping("/weather")
 	public void subscribeWeather(String city) {
-		repository.computeIfAbsent(city).sendOrFetchWeather(messagingTemplate, city, service::subscribeWeatherByCity);
+		service.computeIfAbsent(city).sendOrFetchWeather(messagingTemplate, city, service::subscribeWeatherByCity);
 	}
 
 	@Scheduled(fixedRate = 30, timeUnit = TimeUnit.SECONDS)
