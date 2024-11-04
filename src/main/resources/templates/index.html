@@ -78,6 +78,8 @@
             margin: 5px 0;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 </head>
 <body>
 
@@ -93,21 +95,20 @@
 
 <script>
     async function getWeather() {
+        const socket = new SockJS('/ws/weather');
+        const stompClient = Stomp.over(socket);
 
-        const city = document.querySelector("#city").value;
-        const resultDiv = document.querySelector("#result");
+        stompClient.connect({}, () => {
+            stompClient.subscribe('/topic/weather', (message) => {
+                const weatherData = JSON.parse(message.body);
+                document.querySelector("#result").innerHTML = `
+                <p>City: ${weatherData.name}</p>
+                <p>Temperature: ${weatherData.temperature}°C</p>`;
+            });
 
-        // API 호출
-        const response = await fetch(`/api/weather?city=${encodeURIComponent(city)}`);
-
-        if (!response.ok) {
-            resultDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
-        }
-
-        const data = await response.json();
-
-        // 온도 정보를 표시
-        resultDiv.innerHTML = `<p>City: ${data.name}</p><p>Temperature: ${data.temperature}°C</p>`;
+            // 특정 도시를 구독
+            stompClient.send("/app/weather", {}, "Seoul");
+        });
     }
 </script>
 
