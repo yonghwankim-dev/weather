@@ -2,6 +2,7 @@ package site.weather.api.weather.domain;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
@@ -46,5 +47,14 @@ public class WeatherSubscriptionInfo {
 
 	public boolean hasWeatherResponse() {
 		return weatherResponse != null;
+	}
+
+	public void sendOrFetchWeather(SimpMessagingTemplate messagingTemplate, String city,
+		Consumer<String> fetchWeatherByCity) {
+		if (hasWeatherResponse()) {
+			sendMessage(messagingTemplate, city);
+		} else {
+			fetchWeatherByCity.accept(city);
+		}
 	}
 }

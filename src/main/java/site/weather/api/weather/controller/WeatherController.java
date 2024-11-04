@@ -35,15 +35,8 @@ public class WeatherController {
 
 	@MessageMapping("/weather")
 	public void subscribeWeather(String city) {
-		if (weatherSubscriptionInfoMap.containsKey(city)) {
-			if (weatherSubscriptionInfoMap.get(city).hasWeatherResponse()) {
-				weatherSubscriptionInfoMap.get(city).sendMessage(messagingTemplate, city);
-			} else {
-				fetchWeatherByCity(city);
-			}
-		} else {
-			fetchWeatherByCity(city);
-		}
+		weatherSubscriptionInfoMap.computeIfAbsent(city, key -> new WeatherSubscriptionInfo())
+			.sendOrFetchWeather(messagingTemplate, city, this::fetchWeatherByCity);
 	}
 
 	private void fetchWeatherByCity(String city) {
