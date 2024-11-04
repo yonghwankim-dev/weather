@@ -5,7 +5,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
+import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
+import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -14,7 +18,8 @@ import site.weather.api.weather.service.WeatherWebClient;
 
 @Configuration
 @RequiredArgsConstructor
-public class WeatherConfig {
+@EnableWebSocketMessageBroker
+public class WeatherConfig implements WebSocketMessageBrokerConfigurer {
 
 	private final ObjectMapper objectMapper;
 
@@ -30,5 +35,18 @@ public class WeatherConfig {
 			})
 			.build();
 		return new WeatherWebClient(webClient, appid);
+	}
+
+	@Override
+	public void registerStompEndpoints(StompEndpointRegistry registry) {
+		registry.addEndpoint("/ws/weather")
+			.setAllowedOrigins("http://localhost:8080")
+			.withSockJS();
+	}
+
+	@Override
+	public void configureMessageBroker(MessageBrokerRegistry config) {
+		config.enableSimpleBroker("/topic");
+		config.setApplicationDestinationPrefixes("/app");
 	}
 }
