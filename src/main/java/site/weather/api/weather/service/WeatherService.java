@@ -41,4 +41,12 @@ public class WeatherService {
 	public Set<String> findAllSubscribedCities() {
 		return repository.findAllSubscribedCities();
 	}
+
+	public void addSessionId(String city, String sessionId) {
+		repository.addSessionId(city, sessionId);
+	}
+
+	public void removeCityIfNoSubscribers(String sessionId) {
+		repository.removeCityIfNoSubscribers(sessionId);
+	}
 }
