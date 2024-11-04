@@ -9,7 +9,6 @@ import org.springframework.stereotype.Controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import site.weather.api.weather.repository.WeatherSubscriptionInfoRepository;
 import site.weather.api.weather.service.WeatherService;
 
 @Controller
@@ -19,15 +18,15 @@ public class WeatherController {
 
 	private final WeatherService service;
 	private final SimpMessagingTemplate messagingTemplate;
-	private final WeatherSubscriptionInfoRepository repository;
 
 	@MessageMapping("/weather")
 	public void subscribeWeather(String city) {
-		service.computeIfAbsent(city).sendOrFetchWeather(messagingTemplate, city, service::subscribeWeatherByCity);
+		service.computeIfAbsent(city)
+			.sendOrFetchWeather(messagingTemplate, city, service::subscribeWeatherByCity);
 	}
 
 	@Scheduled(fixedRate = 30, timeUnit = TimeUnit.SECONDS)
 	public void fetchAndBroadcastByCity() {
-		repository.findAllCities().forEach(service::subscribeWeatherByCity);
+		service.findAllSubscribedCities().forEach(service::subscribeWeatherByCity);
 	}
 }
