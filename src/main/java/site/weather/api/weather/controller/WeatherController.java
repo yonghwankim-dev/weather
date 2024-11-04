@@ -1,6 +1,7 @@
 package site.weather.api.weather.controller;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,7 +19,7 @@ import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.scheduler.Schedulers;
-import site.weather.api.weather.dto.response.WeatherResponse;
+import site.weather.api.weather.domain.WeatherSubscriptionInfo;
 import site.weather.api.weather.service.WeatherService;
 
 @Controller
@@ -30,17 +31,14 @@ public class WeatherController {
 
 	private final SimpMessagingTemplate messagingTemplate;
 
-	private final Set<String> subscribers = ConcurrentHashMap.newKeySet();
 	// 도시별 세션 ID 컬렉션
 	private final Map<String, Set<String>> subscribersSessionId = new ConcurrentHashMap<>();
-	private final Map<String, WeatherResponse> cachedWeatherResponses = new ConcurrentHashMap<>();
+	private final Map<String, WeatherSubscriptionInfo> weatherSubscriptionInfoMap = new ConcurrentHashMap<>();
 
 	@MessageMapping("/weather")
 	public void subscribeWeather(String city) {
-		subscribers.add(city);
-
-		if (cachedWeatherResponses.containsKey(city)) {
-			messagingTemplate.convertAndSend("/topic/weather/" + city, cachedWeatherResponses.get(city));
+		if (weatherSubscriptionInfoMap.containsKey(city)) {
+			weatherSubscriptionInfoMap.get(city).sendMessage(messagingTemplate, city);
 		} else {
 			fetchWeatherByCity(city);
 		}
@@ -51,14 +49,18 @@ public class WeatherController {
 			.publishOn(Schedulers.boundedElastic())
 			.log()
 			.subscribe(response -> {
-				cachedWeatherResponses.put(city, response);
+				weatherSubscriptionInfoMap.computeIfPresent(city,
+					(key, weatherSubscriptionInfo) -> {
+						weatherSubscriptionInfo.changeWeatherResponse(response);
+						return weatherSubscriptionInfo;
+					});
 				messagingTemplate.convertAndSend("/topic/weather/" + city, response);
 			});
 	}
 
 	@Scheduled(fixedRate = 30, timeUnit = TimeUnit.SECONDS)
 	public void fetchAndBroadcastByCity() {
-		subscribers.forEach(this::fetchWeatherByCity);
+		subscribersSessionId.keySet().forEach(this::fetchWeatherByCity);
 	}
 
 	@EventListener
@@ -79,18 +81,19 @@ public class WeatherController {
 	@EventListener
 	public void handleStompDisconnectedHandler(SessionDisconnectEvent event) {
 		String sessionId = event.getSessionId();
-		Set<String> delCity = new HashSet<>();
-		// 도시별로 sessionId를 제거하고 제거한 Set이 비어있으면 삭제 집합에 추가한다
-		subscribersSessionId.keySet().forEach(city -> {
-			Set<String> sessionIdSet = subscribersSessionId.getOrDefault(city, new HashSet<>());
+		List<String> citiesToRemove = new ArrayList<>();
+
+		// 도시별로 sessionId를 제거하고 제거한 Set이 비어있으면 삭제 목록에 추가
+		subscribersSessionId.forEach((city, sessionIdSet) -> {
 			sessionIdSet.remove(sessionId);
 			if (sessionIdSet.isEmpty()) {
-				delCity.add(city);
+				citiesToRemove.add(city);
 			}
 		});
-		delCity.forEach(city -> {
+
+		// 삭제할 도시 목록에서 제거 작업 수행
+		citiesToRemove.forEach(city -> {
 			subscribersSessionId.remove(city);
-			subscribers.remove(city);
 			log.info("remove the city " + city);
 		});
 	}
