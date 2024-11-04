@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+import site.weather.api.weather.domain.WeatherSubscriptionInfo;
 import site.weather.api.weather.dto.response.WeatherResponse;
 import site.weather.api.weather.repository.WeatherSubscriptionInfoRepository;
 
@@ -29,5 +30,9 @@ public class WeatherService {
 				repository.changeWeatherResponse(city, response);
 				messagingTemplate.convertAndSend("/topic/weather/" + city, response);
 			});
+	}
+
+	public WeatherSubscriptionInfo computeIfAbsent(String city) {
+		return repository.computeIfAbsent(city);
 	}
 }
