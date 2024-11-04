@@ -3,6 +3,7 @@ package site.weather.api.weather.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -61,17 +62,24 @@ public class WeatherController {
 	@EventListener
 	public void handleStompConnectedHandler(SessionSubscribeEvent event) {
 		StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-		String sessionId = headerAccessor.getSessionId();
 		String destination = headerAccessor.getDestination();
-		if (destination == null) {
-			return;
-		}
-		String[] parts = destination.split("/");
-		String city = parts[parts.length - 1];
-		// subscribersSessionId에 도시가 없는 경우 새로운 HashSet을 추가
-		weatherSubscriptionInfoMap.computeIfAbsent(city, k -> new WeatherSubscriptionInfo())
-			.addSessionId(sessionId);
+
+		parseCityFrom(destination).ifPresent(city -> {
+			String sessionId = headerAccessor.getSessionId();
+			// subscribersSessionId에 도시가 없는 경우 새로운 HashSet을 추가
+			weatherSubscriptionInfoMap.computeIfAbsent(city, k -> new WeatherSubscriptionInfo())
+				.addSessionId(sessionId);
+		});
 		log.info("weatherSubscriptionInfoMap: {}", weatherSubscriptionInfoMap);
+	}
+
+	private Optional<String> parseCityFrom(String destination) {
+		if (destination == null) {
+			return Optional.empty();
+		}
+		final String DESTINATION_SPLITTER = "/";
+		String[] parts = destination.split(DESTINATION_SPLITTER);
+		return Optional.of(parts[parts.length - 1]);
 	}
 
 	@EventListener
