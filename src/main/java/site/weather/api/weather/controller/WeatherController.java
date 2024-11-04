@@ -1,5 +1,6 @@
 package site.weather.api.weather.controller;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -25,14 +26,15 @@ public class WeatherController {
 	private final SimpMessagingTemplate messagingTemplate;
 
 	private final Set<String> subscribers = ConcurrentHashMap.newKeySet();
-
-	private WeatherResponse cachedWeatherResponse;
-
+	private final Map<String, WeatherResponse> cachedWeatherResponses = new ConcurrentHashMap<>();
+	
 	@MessageMapping("/weather")
 	public void subscribeWeather(String city) {
 		subscribers.add(city);
 
-		if (cachedWeatherResponse == null) {
+		if (cachedWeatherResponses.containsKey(city)) {
+			messagingTemplate.convertAndSend("/topic/weather/" + city, cachedWeatherResponses.get(city));
+		} else {
 			fetchWeatherByCity(city);
 		}
 	}
@@ -42,7 +44,7 @@ public class WeatherController {
 			.publishOn(Schedulers.boundedElastic())
 			.log()
 			.subscribe(response -> {
-				cachedWeatherResponse = response;
+				cachedWeatherResponses.put(city, response);
 				messagingTemplate.convertAndSend("/topic/weather/" + city, response);
 			});
 	}
