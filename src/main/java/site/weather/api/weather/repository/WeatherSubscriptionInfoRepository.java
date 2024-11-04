@@ -14,5 +14,5 @@ public interface WeatherSubscriptionInfoRepository {
 
 	void changeWeatherResponse(String city, WeatherResponse response);
 
-	Set<String> findAllCities();
+	Set<String> findAllSubscribedCities();
 }

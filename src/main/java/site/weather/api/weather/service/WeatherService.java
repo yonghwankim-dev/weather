@@ -1,5 +1,7 @@
 package site.weather.api.weather.service;
 
+import java.util.Set;
+
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -34,5 +36,9 @@ public class WeatherService {
 
 	public WeatherSubscriptionInfo computeIfAbsent(String city) {
 		return repository.computeIfAbsent(city);
+	}
+
+	public Set<String> findAllSubscribedCities() {
+		return repository.findAllSubscribedCities();
 	}
 }

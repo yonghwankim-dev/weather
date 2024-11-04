@@ -60,7 +60,7 @@ public class MemoryWeatherSubscriptionInfoRepository implements WeatherSubscript
 	}
 
 	@Override
-	public Set<String> findAllCities() {
+	public Set<String> findAllSubscribedCities() {
 		return weatherSubscriptionInfoMap.keySet();
 	}
 }
