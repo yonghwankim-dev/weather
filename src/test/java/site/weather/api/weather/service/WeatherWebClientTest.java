@@ -22,7 +22,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 import site.weather.api.weather.dto.response.WeatherResponse;
 
@@ -78,6 +80,28 @@ class WeatherWebClientTest {
 		String city = "Seoul";
 		// when
 		Mono<WeatherResponse> source = client.fetchWeatherByCity(city);
+		// then
+		WeatherResponse expected = new WeatherResponse("Seoul", 24.66);
+		StepVerifier.create(source)
+			.expectNext(expected)
+			.verifyComplete();
+	}
+
+	@DisplayName("서울의 날씨 정보를 조회하고 Flux로 받는다")
+	@Test
+	void givenCityName_whenFetchWeatherByCity_thenReturnFluxWeather() {
+		// given
+		MockResponse mockResponse = new MockResponse()
+			.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+			.setResponseCode(200)
+			.setBody(getWeatherJson());
+		mockWebServer.enqueue(mockResponse);
+
+		String city = "Seoul";
+		// when
+		Flux<WeatherResponse> source = Flux.just(client.fetchWeatherByCity(city))
+			.flatMap(Mono::flux)
+			.publishOn(Schedulers.boundedElastic());
 		// then
 		WeatherResponse expected = new WeatherResponse("Seoul", 24.66);
 		StepVerifier.create(source)
