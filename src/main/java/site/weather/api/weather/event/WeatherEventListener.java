@@ -46,5 +46,6 @@ public class WeatherEventListener {
 	@EventListener
 	public void handleStompDisconnectedHandler(SessionDisconnectEvent event) {
 		service.removeCityIfNoSubscribers(event.getSessionId());
+		log.info("disconnect sessionId={}", event.getSessionId());
 	}
 }

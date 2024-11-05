@@ -28,7 +28,6 @@ public class MemoryWeatherSubscriptionInfoRepository implements WeatherSubscript
 		// 도시가 없는 경우 새로운 객체 추가한 다음에 sessionId 추가
 		weatherSubscriptionInfoMap.computeIfAbsent(city, k -> new WeatherSubscriptionInfo())
 			.addSessionId(sessionId);
-		log.info("add city:{}, sessionId: {}", city, sessionId);
 	}
 
 	@Override
