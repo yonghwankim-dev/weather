@@ -7,6 +7,7 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
+import org.springframework.web.socket.messaging.SessionUnsubscribeEvent;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,13 @@ public class WeatherEventListener {
 	private Optional<String> parseCityFrom(String destination) {
 		return Optional.ofNullable(destination)
 			.map(dst -> dst.substring(dst.lastIndexOf("/") + 1));
+	}
+
+	@EventListener
+	public void handleStompUnsubscribeHandler(SessionUnsubscribeEvent event) {
+		StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
+		String sessionId = headerAccessor.getSessionId();
+		service.removeCityIfNoSubscribers(sessionId);
 	}
 
 	@EventListener

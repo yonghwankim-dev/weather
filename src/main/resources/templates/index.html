@@ -88,19 +88,26 @@
     <label for="city">Enter City Name:</label>
     <input type="text" id="city" name="city" value="Seoul" required>
     <button type="button" onclick="getWeather()">Get Weather</button>
+    <button type="button" onclick="cancelWeather()">Cancel</button>
 </form>
 
 
 <div id="result"></div>
 
 <script>
+    let stompClient;
+    let subscription;
+
     async function getWeather() {
         const socket = new SockJS('/ws/weather');
-        const stompClient = Stomp.over(socket);
+        stompClient = Stomp.over(socket);
         const city = document.querySelector("#city").value;
 
         stompClient.connect({}, () => {
-            stompClient.subscribe('/topic/weather/' + city, (message) => {
+            if (subscription) {
+                subscription.unsubscribe();
+            }
+            subscription = stompClient.subscribe('/topic/weather/' + city, (message) => {
                 const weatherData = JSON.parse(message.body);
                 document.querySelector("#result").innerHTML = `
                 <p>City: ${weatherData.name}</p>
@@ -110,6 +117,14 @@
             // 특정 도시를 구독
             stompClient.send("/app/weather", {}, city);
         });
+    }
+
+    async function cancelWeather() {
+        if (subscription) {
+            subscription.unsubscribe();
+            console.log("Unsubscribed from the weather topic.");
+            subscription = null; // 구독 ID 초기화
+        }
     }
 </script>
 
