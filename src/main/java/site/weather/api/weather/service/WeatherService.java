@@ -27,7 +27,6 @@ public class WeatherService {
 	public void subscribeWeatherByCity(String city) {
 		client.fetchWeatherByCity(city)
 			.publishOn(Schedulers.boundedElastic())
-			.log()
 			.subscribe(response -> {
 				repository.changeWeatherResponse(city, response);
 				messagingTemplate.convertAndSend("/topic/weather/" + city, response);

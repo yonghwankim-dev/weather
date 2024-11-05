@@ -3,10 +3,12 @@ package site.weather.api.weather.service;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 import site.weather.api.weather.domain.Units;
 import site.weather.api.weather.dto.response.WeatherResponse;
 
+@Slf4j
 public class WeatherWebClient {
 	private final WebClient webClient;
 	private final String appid;
@@ -18,6 +20,7 @@ public class WeatherWebClient {
 
 	@Cacheable(value = "weatherCache", key = "#city")
 	public Mono<WeatherResponse> fetchWeatherByCity(String city) {
+		log.info("call fetchWeatherByCity, city={}", city);
 		return webClient.get()
 			.uri(uriBuilder -> uriBuilder
 				.path("/data/2.5/weather")
