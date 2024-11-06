@@ -87,7 +87,7 @@ class WeatherWebClientTest {
 		// when
 		Mono<WeatherResponse> source = client.fetchWeatherByCity(city);
 		// then
-		WeatherResponse expected = new WeatherResponse("Seoul", 24.66);
+		WeatherResponse expected = WeatherResponse.ok("Seoul", 24.66);
 		StepVerifier.create(source)
 			.expectNext(expected)
 			.verifyComplete();
@@ -109,7 +109,28 @@ class WeatherWebClientTest {
 			.flatMap(Mono::flux)
 			.publishOn(Schedulers.boundedElastic());
 		// then
-		WeatherResponse expected = new WeatherResponse("Seoul", 24.66);
+		WeatherResponse expected = WeatherResponse.ok("Seoul", 24.66);
+		StepVerifier.create(source)
+			.expectNext(expected)
+			.verifyComplete();
+	}
+
+	@DisplayName("서울로 날씨 조회할때 에러 응답을 받으면 NA 정보를 담은 객체를 반환한다")
+	@Test
+	void givenCityName_whenResponseError_thenReturnOfNA() {
+		// given
+		MockResponse mockResponse = new MockResponse()
+			.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+			.setResponseCode(200)
+			.setBody(getWeatherJson());
+		mockWebServer.enqueue(mockResponse);
+
+		String city = "Seoul";
+		// when
+		Mono<WeatherResponse> source = client.fetchWeatherByCity(city);
+
+		// then
+		WeatherResponse expected = WeatherResponse.ok("Seoul", 24.66);
 		StepVerifier.create(source)
 			.expectNext(expected)
 			.verifyComplete();

@@ -10,10 +10,21 @@ public class WeatherResponse {
 	private final String name;
 	@JsonProperty("temperature")
 	private final double temperature;
+	@JsonProperty("status")
+	private final String status;
 
-	public WeatherResponse(String name, double temperature) {
+	private WeatherResponse(String name, double temperature, String status) {
 		this.name = name;
 		this.temperature = temperature;
+		this.status = status;
+	}
+
+	public static WeatherResponse ok(String name, double temperature) {
+		return new WeatherResponse(name, temperature, "OK");
+	}
+
+	public static WeatherResponse error(String name) {
+		return new WeatherResponse(name, 0.0, "NA");
 	}
 
 	@Override
