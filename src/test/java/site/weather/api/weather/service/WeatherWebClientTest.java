@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -65,6 +66,11 @@ class WeatherWebClientTest {
 				configurer.defaultCodecs().jackson2JsonDecoder(new Jackson2JsonDecoder(objectMapper));
 			})
 			.build(), appid);
+	}
+
+	@AfterEach
+	void tearDown() throws IOException {
+		mockWebServer.shutdown();
 	}
 
 	@DisplayName("서울의 날씨 정보를 조회한다")
