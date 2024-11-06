@@ -1,6 +1,8 @@
 package site.weather.api.weather.service;
 
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,12 @@ public class WeatherWebClient {
 				.queryParam("units", Units.METRIC)
 				.build())
 			.retrieve()
+			.onStatus(HttpStatusCode::is4xxClientError, response -> {
+				if (response.statusCode() == HttpStatus.NOT_FOUND) {
+					return Mono.error(new WeatherException("not found city " + city));
+				}
+				return response.createError();
+			})
 			.bodyToMono(WeatherResponse.class)
 			.log();
 	}

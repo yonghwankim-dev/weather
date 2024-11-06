@@ -115,24 +115,21 @@ class WeatherWebClientTest {
 			.verifyComplete();
 	}
 
-	@DisplayName("서울로 날씨 조회할때 에러 응답을 받으면 NA 정보를 담은 객체를 반환한다")
+	@DisplayName("찾을 수 없는 도시 이름으로 조회하면 클라이언트에게 404 응답한다")
 	@Test
-	void givenCityName_whenResponseError_thenReturnOfNA() {
+	void givenNotFoundCityName_whenResponseError_thenReturnOfNA() {
 		// given
-		MockResponse mockResponse = new MockResponse()
-			.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-			.setResponseCode(200)
-			.setBody(getWeatherJson());
+		MockResponse mockResponse = new MockResponse().setResponseCode(404);
 		mockWebServer.enqueue(mockResponse);
 
-		String city = "Seoul";
+		String city = "awoiejfaoiwejf";
 		// when
 		Mono<WeatherResponse> source = client.fetchWeatherByCity(city);
 
 		// then
-		WeatherResponse expected = WeatherResponse.ok("Seoul", 24.66);
+		String expected = String.format("not found city %s", city);
 		StepVerifier.create(source)
-			.expectNext(expected)
-			.verifyComplete();
+			.expectErrorMessage(expected)
+			.verify();
 	}
 }
