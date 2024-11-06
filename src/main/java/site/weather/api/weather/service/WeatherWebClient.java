@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 import site.weather.api.weather.domain.Units;
 import site.weather.api.weather.dto.response.WeatherResponse;
+import site.weather.api.weather.error.exception.WeatherException;
 
 @Slf4j
 public class WeatherWebClient {

@@ -1,4 +1,4 @@
-package site.weather.api.weather.dto.response;
+package site.weather.api.weather.error.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
