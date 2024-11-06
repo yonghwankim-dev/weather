@@ -26,7 +26,7 @@ public class WeatherEventListener {
 		StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 		String destination = headerAccessor.getDestination();
 		String sessionId = getSessionId(event);
-		parseCityFrom(destination).ifPresent(city -> service.addSessionId(city, sessionId));
+		parseCityFrom(destination).ifPresent(city -> service.addSubscription(city, sessionId));
 	}
 
 	private String getSessionId(AbstractSubProtocolEvent event) {

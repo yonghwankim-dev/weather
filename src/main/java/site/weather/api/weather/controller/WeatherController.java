@@ -24,6 +24,6 @@ public class WeatherController {
 
 	@Scheduled(fixedRate = 5, timeUnit = TimeUnit.SECONDS)
 	public void fetchAndBroadcastByCity() {
-		service.findAllSubscribedCities().forEach(service::subscribeWeatherByCity);
+		service.findAllCities().forEach(service::subscribeWeatherByCity);
 	}
 }

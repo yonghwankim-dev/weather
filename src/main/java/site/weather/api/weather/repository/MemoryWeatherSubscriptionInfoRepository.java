@@ -15,22 +15,22 @@ import site.weather.api.weather.domain.WeatherSubscriptionInfo;
 @Slf4j
 public class MemoryWeatherSubscriptionInfoRepository implements WeatherSubscriptionInfoRepository {
 
-	private final Map<String, WeatherSubscriptionInfo> store = new ConcurrentHashMap<>();
+	private final Map<String, Set<WeatherSubscriptionInfo>> store = new ConcurrentHashMap<>();
 
 	@Override
-	public void addSessionId(String city, String sessionId) {
-		store.computeIfAbsent(city, WeatherSubscriptionInfo::empty)
-			.addSessionId(sessionId);
+	public void addSubscription(String city, String sessionId) {
+		store.computeIfAbsent(city, key -> ConcurrentHashMap.newKeySet())
+			.add(WeatherSubscriptionInfo.create(city, sessionId));
 	}
 
 	@Override
 	public void removeCityIfNoSubscribers(String sessionId) {
 		List<String> citiesToRemove = new ArrayList<>();
 
-		// 도시별로 sessionId를 제거하고 제거한 Set이 비어있으면 삭제 목록에 추가
-		store.forEach((city, weatherSubscriptionInfo) -> {
-			weatherSubscriptionInfo.removeSessionId(sessionId);
-			if (weatherSubscriptionInfo.isEmptySessionIds()) {
+		// 도시별로 sessionId인 구독 정보를 제거하고 제거한 Set이 비어있으면 삭제 목록에 추가
+		store.forEach((city, set) -> {
+			set.remove(WeatherSubscriptionInfo.create(city, sessionId));
+			if (set.isEmpty()) {
 				citiesToRemove.add(city);
 			}
 		});
@@ -43,7 +43,7 @@ public class MemoryWeatherSubscriptionInfoRepository implements WeatherSubscript
 	}
 
 	@Override
-	public Set<String> findAllSubscribedCities() {
+	public Set<String> findAllCities() {
 		return store.keySet();
 	}
 }
