@@ -15,12 +15,11 @@ import site.weather.api.weather.domain.WeatherSubscriptionInfo;
 @Slf4j
 public class MemoryWeatherSubscriptionInfoRepository implements WeatherSubscriptionInfoRepository {
 
-	private final Map<String, WeatherSubscriptionInfo> weatherSubscriptionInfoMap = new ConcurrentHashMap<>();
-	
+	private final Map<String, WeatherSubscriptionInfo> store = new ConcurrentHashMap<>();
+
 	@Override
 	public void addSessionId(String city, String sessionId) {
-		// 도시가 없는 경우 새로운 객체 추가한 다음에 sessionId 추가
-		weatherSubscriptionInfoMap.computeIfAbsent(city, k -> new WeatherSubscriptionInfo())
+		store.computeIfAbsent(city, WeatherSubscriptionInfo::empty)
 			.addSessionId(sessionId);
 	}
 
@@ -29,7 +28,7 @@ public class MemoryWeatherSubscriptionInfoRepository implements WeatherSubscript
 		List<String> citiesToRemove = new ArrayList<>();
 
 		// 도시별로 sessionId를 제거하고 제거한 Set이 비어있으면 삭제 목록에 추가
-		weatherSubscriptionInfoMap.forEach((city, weatherSubscriptionInfo) -> {
+		store.forEach((city, weatherSubscriptionInfo) -> {
 			weatherSubscriptionInfo.removeSessionId(sessionId);
 			if (weatherSubscriptionInfo.isEmptySessionIds()) {
 				citiesToRemove.add(city);
@@ -38,13 +37,13 @@ public class MemoryWeatherSubscriptionInfoRepository implements WeatherSubscript
 
 		// 삭제할 도시 목록에서 제거 작업 수행
 		citiesToRemove.forEach(city -> {
-			weatherSubscriptionInfoMap.remove(city);
+			store.remove(city);
 			log.info("remove the city " + city);
 		});
 	}
 
 	@Override
 	public Set<String> findAllSubscribedCities() {
-		return weatherSubscriptionInfoMap.keySet();
+		return store.keySet();
 	}
 }

@@ -1,20 +1,22 @@
 package site.weather.api.weather.domain;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class WeatherSubscriptionInfo {
+	private final String city;
 	private final Set<String> sessionIds;
 
-	public WeatherSubscriptionInfo() {
-		this(new HashSet<>());
+	private WeatherSubscriptionInfo(String city, Set<String> sessionIds) {
+		this.city = city;
+		this.sessionIds = sessionIds;
 	}
 
-	public WeatherSubscriptionInfo(Set<String> sessionIds) {
-		this.sessionIds = sessionIds;
+	public static WeatherSubscriptionInfo empty(String city) {
+		return new WeatherSubscriptionInfo(city, ConcurrentHashMap.newKeySet());
 	}
 
 	public void addSessionId(String sessionId) {
@@ -28,5 +30,10 @@ public class WeatherSubscriptionInfo {
 
 	public boolean isEmptySessionIds() {
 		return sessionIds.isEmpty();
+	}
+
+	@Override
+	public String toString() {
+		return String.format("city=%s, sessionIds=%s", city, sessionIds);
 	}
 }

@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.messaging.AbstractSubProtocolEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 import org.springframework.web.socket.messaging.SessionUnsubscribeEvent;
@@ -24,8 +25,12 @@ public class WeatherEventListener {
 	public void handleStompConnectedHandler(SessionSubscribeEvent event) {
 		StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 		String destination = headerAccessor.getDestination();
-		String sessionId = headerAccessor.getSessionId();
+		String sessionId = getSessionId(event);
 		parseCityFrom(destination).ifPresent(city -> service.addSessionId(city, sessionId));
+	}
+
+	private String getSessionId(AbstractSubProtocolEvent event) {
+		return StompHeaderAccessor.wrap(event.getMessage()).getSessionId();
 	}
 
 	private Optional<String> parseCityFrom(String destination) {
@@ -35,8 +40,7 @@ public class WeatherEventListener {
 
 	@EventListener
 	public void handleStompUnsubscribeHandler(SessionUnsubscribeEvent event) {
-		StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-		String sessionId = headerAccessor.getSessionId();
+		String sessionId = getSessionId(event);
 		service.removeCityIfNoSubscribers(sessionId);
 	}
 
