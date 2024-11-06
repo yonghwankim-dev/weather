@@ -109,12 +109,14 @@
             }
             subscription = stompClient.subscribe('/topic/weather/' + city, (message) => {
                 const weatherData = JSON.parse(message.body);
+                if (weatherData.httpStatusCode === 'NOT_FOUND') {
+                    subscription.unsubscribe();
+                }
                 if (weatherData.error) {
                     // 서버에서 에러 메시지가 온 경우
                     document.querySelector("#result").innerHTML = `
                     <p>Error: ${weatherData.error}</p>
                 `;
-                    subscription.unsubscribe();
                 } else {
                     document.querySelector("#result").innerHTML = `
                 <p>City: ${weatherData.name}</p>
@@ -129,7 +131,7 @@
 
     async function cancelWeather() {
         if (subscription) {
-            subscription.unsubscribe();
+            await subscription.unsubscribe();
             console.log("Unsubscribed from the weather topic.");
             subscription = null; // 구독 ID 초기화
         }

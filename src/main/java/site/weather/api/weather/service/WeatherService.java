@@ -32,10 +32,8 @@ public class WeatherService {
 		client.fetchWeatherByCity(city)
 			.publishOn(Schedulers.boundedElastic())
 			.doOnError(this::isNotFoundCityResponse, throwable -> repository.removeCity(city))
-			.subscribe(response -> messagingTemplate.convertAndSend(destination(city), response), throwable -> {
-				WeatherErrorResponse errorResponse = new WeatherErrorResponse(throwable.getMessage());
-				messagingTemplate.convertAndSend(destination(city), errorResponse);
-			});
+			.subscribe(response -> messagingTemplate.convertAndSend(destination(city), response),
+				throwable -> messagingTemplate.convertAndSend(destination(city), WeatherErrorResponse.from(throwable)));
 	}
 
 	private boolean isNotFoundCityResponse(Throwable throwable) {
