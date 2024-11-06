@@ -1,4 +1,4 @@
-package site.weather.api.weather.service;
+package site.weather.api.weather.error.exception;
 
 public class WeatherException extends RuntimeException {
 	private final String message;
