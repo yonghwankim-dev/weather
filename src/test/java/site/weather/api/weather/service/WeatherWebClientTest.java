@@ -115,9 +115,9 @@ class WeatherWebClientTest {
 			.verifyComplete();
 	}
 
-	@DisplayName("찾을 수 없는 도시 이름으로 조회하면 클라이언트에게 404 응답한다")
+	@DisplayName("찾을 수 없는 도시 이름으로 조회하면 클라이언트에게 에러를 응답한다")
 	@Test
-	void givenNotFoundCityName_whenResponseError_thenReturnOfNA() {
+	void givenNotFoundCityName_whenResponseError_thenReturnErrorMono() {
 		// given
 		MockResponse mockResponse = new MockResponse().setResponseCode(404);
 		mockWebServer.enqueue(mockResponse);
@@ -128,6 +128,23 @@ class WeatherWebClientTest {
 
 		// then
 		String expected = String.format("not found city %s", city);
+		StepVerifier.create(source)
+			.expectErrorMessage(expected)
+			.verify();
+	}
+
+	@DisplayName("날씨 조회시 API가 유효하지 않으면 401을 응답하고 클라이언트에게 에러를 응답한다")
+	@Test
+	void givenCityName_whenResponse401Error_thenReturnErrorMono() {
+		// given
+		MockResponse mockResponse = new MockResponse().setResponseCode(401);
+		mockWebServer.enqueue(mockResponse);
+
+		String city = "Seoul";
+		// when
+		Mono<WeatherResponse> source = client.fetchWeatherByCity(city);
+		// then
+		String expected = "invalid API key";
 		StepVerifier.create(source)
 			.expectErrorMessage(expected)
 			.verify();

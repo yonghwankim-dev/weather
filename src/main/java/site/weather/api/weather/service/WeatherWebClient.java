@@ -33,8 +33,14 @@ public class WeatherWebClient {
 				.build())
 			.retrieve()
 			.onStatus(HttpStatusCode::is4xxClientError, response -> {
+				if (response.statusCode() == HttpStatus.UNAUTHORIZED) {
+					return Mono.error(new WeatherException("invalid API key"));
+				}
 				if (response.statusCode() == HttpStatus.NOT_FOUND) {
 					return Mono.error(new WeatherException("not found city " + city));
+				}
+				if (response.statusCode() == HttpStatus.TOO_MANY_REQUESTS) {
+					return Mono.error(new WeatherException("too many request"));
 				}
 				return response.createError();
 			})
