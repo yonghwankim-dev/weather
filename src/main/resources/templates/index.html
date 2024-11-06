@@ -109,9 +109,16 @@
             }
             subscription = stompClient.subscribe('/topic/weather/' + city, (message) => {
                 const weatherData = JSON.parse(message.body);
-                document.querySelector("#result").innerHTML = `
+                if (weatherData.error) {
+                    // 서버에서 에러 메시지가 온 경우
+                    document.querySelector("#result").innerHTML = `
+                    <p>Error: ${weatherData.error}</p>
+                `;
+                } else {
+                    document.querySelector("#result").innerHTML = `
                 <p>City: ${weatherData.name}</p>
                 <p>Temperature: ${weatherData.temperature}°C</p>`;
+                }
             });
 
             // 특정 도시를 구독
