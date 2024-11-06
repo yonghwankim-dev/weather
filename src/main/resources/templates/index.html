@@ -109,12 +109,14 @@
             }
             subscription = stompClient.subscribe('/topic/weather/' + city, (message) => {
                 const weatherData = JSON.parse(message.body);
+                if (weatherData.httpStatusCode === 'NOT_FOUND') {
+                    subscription.unsubscribe();
+                }
                 if (weatherData.error) {
                     subscription.unsubscribe();
                     document.querySelector("#result").innerHTML = `
                     <p>Error: ${weatherData.error}</p>
                 `;
-                    subscription.unsubscribe();
                 } else {
                     document.querySelector("#result").innerHTML = `
                 <p>City: ${weatherData.name}</p>
