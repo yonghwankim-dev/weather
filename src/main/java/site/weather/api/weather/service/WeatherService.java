@@ -29,12 +29,12 @@ public class WeatherService {
 			.subscribe(response -> messagingTemplate.convertAndSend("/topic/weather/" + city, response));
 	}
 
-	public Set<String> findAllSubscribedCities() {
-		return repository.findAllSubscribedCities();
+	public Set<String> findAllCities() {
+		return repository.findAllCities();
 	}
 
-	public void addSessionId(String city, String sessionId) {
-		repository.addSessionId(city, sessionId);
+	public void addSubscription(String city, String sessionId) {
+		repository.addSubscription(city, sessionId);
 	}
 
 	public void removeCityIfNoSubscribers(String sessionId) {
