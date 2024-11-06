@@ -11,6 +11,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import site.weather.api.weather.dto.response.WeatherResponse;
 import site.weather.api.weather.error.dto.WeatherErrorResponse;
+import site.weather.api.weather.error.exception.WeatherException;
 import site.weather.api.weather.repository.WeatherSubscriptionInfoRepository;
 
 @Service
@@ -30,7 +31,8 @@ public class WeatherService {
 	public void subscribeWeatherByCity(String city) {
 		client.fetchWeatherByCity(city)
 			.publishOn(Schedulers.boundedElastic())
-			.doOnError(throwable -> repository.removeCity(city))
+			.doOnError(throwable -> throwable instanceof WeatherException exception && exception.is404Error(),
+				throwable -> repository.removeCity(city))
 			.subscribe(response -> messagingTemplate.convertAndSend(destination(city), response), throwable -> {
 				WeatherErrorResponse errorResponse = new WeatherErrorResponse(throwable.getMessage());
 				messagingTemplate.convertAndSend(destination(city), errorResponse);
