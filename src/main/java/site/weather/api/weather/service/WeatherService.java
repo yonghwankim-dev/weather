@@ -31,12 +31,15 @@ public class WeatherService {
 	public void subscribeWeatherByCity(String city) {
 		client.fetchWeatherByCity(city)
 			.publishOn(Schedulers.boundedElastic())
-			.doOnError(throwable -> throwable instanceof WeatherException exception && exception.is404Error(),
-				throwable -> repository.removeCity(city))
+			.doOnError(this::isNotFoundCityResponse, throwable -> repository.removeCity(city))
 			.subscribe(response -> messagingTemplate.convertAndSend(destination(city), response), throwable -> {
 				WeatherErrorResponse errorResponse = new WeatherErrorResponse(throwable.getMessage());
 				messagingTemplate.convertAndSend(destination(city), errorResponse);
 			});
+	}
+
+	private boolean isNotFoundCityResponse(Throwable throwable) {
+		return throwable instanceof WeatherException exception && exception.is404Error();
 	}
 
 	private String destination(String city) {
