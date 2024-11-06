@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,6 +29,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 import site.weather.api.weather.dto.response.WeatherResponse;
+import site.weather.api.weather.repository.WeatherSubscriptionInfoRepository;
 
 @SpringBootTest
 class WeatherWebClientTest {
@@ -40,6 +42,9 @@ class WeatherWebClientTest {
 
 	@Autowired
 	private ObjectMapper objectMapper;
+
+	@Autowired
+	private WeatherSubscriptionInfoRepository repository;
 
 	private static String getWeatherJson() {
 		ClassPathResource resource = new ClassPathResource("weather.json");
@@ -115,7 +120,7 @@ class WeatherWebClientTest {
 			.verifyComplete();
 	}
 
-	@DisplayName("찾을 수 없는 도시 이름으로 조회하면 클라이언트에게 에러를 응답한다")
+	@DisplayName("존재하지 않는 도시 이름으로 날씨 조회시 API가 404을 응답하고 클라이언트에게 에러를 응답한다")
 	@Test
 	void givenNotFoundCityName_whenResponseError_thenReturnErrorMono() {
 		// given
@@ -131,6 +136,7 @@ class WeatherWebClientTest {
 		StepVerifier.create(source)
 			.expectErrorMessage(expected)
 			.verify();
+		Assertions.assertThat(repository.findAllCities()).isEmpty();
 	}
 
 	@DisplayName("날씨 조회시 API가 유효하지 않으면 401을 응답하고 클라이언트에게 에러를 응답한다")
