@@ -52,4 +52,9 @@ public class MemoryWeatherSubscriptionInfoRepository implements WeatherSubscript
 	public Set<String> findAllCities() {
 		return store.keySet();
 	}
+
+	@Override
+	public void removeCity(String city) {
+		store.remove(city);
+	}
 }
