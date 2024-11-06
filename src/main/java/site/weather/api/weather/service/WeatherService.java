@@ -18,6 +18,7 @@ import site.weather.api.weather.repository.WeatherSubscriptionInfoRepository;
 @Slf4j
 public class WeatherService {
 
+	private static final String TOPIC_PREFIX = "/topic/weather/";
 	private final WeatherWebClient client;
 	private final WeatherSubscriptionInfoRepository repository;
 	private final SimpMessagingTemplate messagingTemplate;
@@ -29,10 +30,15 @@ public class WeatherService {
 	public void subscribeWeatherByCity(String city) {
 		client.fetchWeatherByCity(city)
 			.publishOn(Schedulers.boundedElastic())
-			.subscribe(response -> messagingTemplate.convertAndSend("/topic/weather/" + city, response), throwable -> {
+			.doOnError(throwable -> repository.removeCity(city))
+			.subscribe(response -> messagingTemplate.convertAndSend(destination(city), response), throwable -> {
 				WeatherErrorResponse errorResponse = new WeatherErrorResponse(throwable.getMessage());
-				messagingTemplate.convertAndSend("/topic/weather/" + city, errorResponse);
+				messagingTemplate.convertAndSend(destination(city), errorResponse);
 			});
+	}
+
+	private String destination(String city) {
+		return TOPIC_PREFIX + city;
 	}
 
 	public Set<String> findAllCities() {

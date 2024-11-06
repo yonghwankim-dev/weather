@@ -8,4 +8,6 @@ public interface WeatherSubscriptionInfoRepository {
 	void removeCityIfNoSubscribers(String sessionId);
 
 	Set<String> findAllCities();
+
+	void removeCity(String city);
 }
