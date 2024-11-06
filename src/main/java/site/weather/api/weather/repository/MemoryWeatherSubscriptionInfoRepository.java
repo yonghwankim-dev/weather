@@ -10,19 +10,13 @@ import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
 import site.weather.api.weather.domain.WeatherSubscriptionInfo;
-import site.weather.api.weather.dto.response.WeatherResponse;
 
 @Component
 @Slf4j
 public class MemoryWeatherSubscriptionInfoRepository implements WeatherSubscriptionInfoRepository {
 
 	private final Map<String, WeatherSubscriptionInfo> weatherSubscriptionInfoMap = new ConcurrentHashMap<>();
-
-	@Override
-	public WeatherSubscriptionInfo computeIfAbsent(String city) {
-		return weatherSubscriptionInfoMap.computeIfAbsent(city, key -> new WeatherSubscriptionInfo());
-	}
-
+	
 	@Override
 	public void addSessionId(String city, String sessionId) {
 		// 도시가 없는 경우 새로운 객체 추가한 다음에 sessionId 추가
@@ -47,15 +41,6 @@ public class MemoryWeatherSubscriptionInfoRepository implements WeatherSubscript
 			weatherSubscriptionInfoMap.remove(city);
 			log.info("remove the city " + city);
 		});
-	}
-
-	@Override
-	public void changeWeatherResponse(String city, WeatherResponse response) {
-		weatherSubscriptionInfoMap.computeIfPresent(city,
-			(key, subscriptionInfo) -> {
-				subscriptionInfo.changeWeatherResponse(response);
-				return subscriptionInfo;
-			});
 	}
 
 	@Override
