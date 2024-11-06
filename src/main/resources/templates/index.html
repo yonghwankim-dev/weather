@@ -114,6 +114,7 @@
                     document.querySelector("#result").innerHTML = `
                     <p>Error: ${weatherData.error}</p>
                 `;
+                    subscription.unsubscribe();
                 } else {
                     document.querySelector("#result").innerHTML = `
                 <p>City: ${weatherData.name}</p>
