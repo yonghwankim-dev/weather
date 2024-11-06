@@ -1,8 +1,10 @@
 package site.weather.api.weather.domain;
 
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@EqualsAndHashCode
 public class WeatherSubscriptionInfo {
 	private final String city;
 	private final String sessionId;

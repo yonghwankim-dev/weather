@@ -27,6 +27,7 @@ public class WeatherEventListener {
 		String destination = headerAccessor.getDestination();
 		String sessionId = getSessionId(event);
 		parseCityFrom(destination).ifPresent(city -> service.addSubscription(city, sessionId));
+		log.info("connect sessionId={}", sessionId);
 	}
 
 	private String getSessionId(AbstractSubProtocolEvent event) {
@@ -40,8 +41,8 @@ public class WeatherEventListener {
 
 	@EventListener
 	public void handleStompUnsubscribeHandler(SessionUnsubscribeEvent event) {
-		String sessionId = getSessionId(event);
-		service.removeCityIfNoSubscribers(sessionId);
+		service.removeCityIfNoSubscribers(getSessionId(event));
+		log.info("unsubscribe sessionId={}", getSessionId(event));
 	}
 
 	@EventListener

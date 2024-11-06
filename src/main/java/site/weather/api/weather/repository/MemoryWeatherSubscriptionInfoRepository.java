@@ -25,21 +25,27 @@ public class MemoryWeatherSubscriptionInfoRepository implements WeatherSubscript
 
 	@Override
 	public void removeCityIfNoSubscribers(String sessionId) {
-		List<String> citiesToRemove = new ArrayList<>();
+		// 삭제할 도시 목록에서 key 제거 작업 수행
+		removeSubscriptionBy(sessionId).stream()
+			.peek(city -> log.info("remove the city " + city))
+			.forEach(store::remove);
+	}
 
+	/**
+	 * sessionId를 가지고 있는 구독 정보를 제거한다
+	 * @param sessionId 세션 ID
+	 * @return 구독 정보 제거후 구독자가 없는 도시 집합 컬렉션
+	 */
+	private List<String> removeSubscriptionBy(String sessionId) {
+		List<String> result = new ArrayList<>();
 		// 도시별로 sessionId인 구독 정보를 제거하고 제거한 Set이 비어있으면 삭제 목록에 추가
 		store.forEach((city, set) -> {
 			set.remove(WeatherSubscriptionInfo.create(city, sessionId));
 			if (set.isEmpty()) {
-				citiesToRemove.add(city);
+				result.add(city);
 			}
 		});
-
-		// 삭제할 도시 목록에서 제거 작업 수행
-		citiesToRemove.forEach(city -> {
-			store.remove(city);
-			log.info("remove the city " + city);
-		});
+		return result;
 	}
 
 	@Override
