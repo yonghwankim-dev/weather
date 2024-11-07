@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
-import site.weather.api.weather.domain.WeatherSubscriptionInfo;
 import site.weather.api.weather.dto.response.WeatherResponse;
 import site.weather.api.weather.error.dto.WeatherErrorResponse;
 import site.weather.api.weather.error.exception.BadWebClientRequestException;
@@ -57,9 +56,5 @@ public class WeatherService {
 
 	public void removeCityIfNoSubscribers(String sessionId) {
 		repository.removeCityIfNoSubscribers(sessionId);
-	}
-
-	public WeatherSubscriptionInfo computeIfAbsent(String city) {
-		return repository.computeIfAbsent(city);
 	}
 }
