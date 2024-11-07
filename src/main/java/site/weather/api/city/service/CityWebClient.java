@@ -2,6 +2,7 @@ package site.weather.api.city.service;
 
 import java.util.List;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -28,6 +29,7 @@ public class CityWebClient {
 		this.objectMapper = objectMapper;
 	}
 
+	@Cacheable(value = "cityCache", key = "#city")
 	public Mono<List<City>> fetchCityBy(String city) {
 		log.info("city: {}", city);
 		return webClient.get()
