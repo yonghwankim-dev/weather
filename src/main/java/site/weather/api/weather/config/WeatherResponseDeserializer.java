@@ -16,6 +16,6 @@ public class WeatherResponseDeserializer extends JsonDeserializer<WeatherRespons
 		JsonNode jsonNode = p.getCodec().readTree(p);
 		String name = jsonNode.get("name").asText();
 		double temperature = jsonNode.path("main").get("temp").asDouble();
-		return WeatherResponse.ok(name, temperature);
+		return WeatherResponse.of(name, temperature);
 	}
 }
