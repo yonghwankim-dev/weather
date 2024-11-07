@@ -1,7 +1,6 @@
 package site.weather.api.weather.service;
 
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -9,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 import site.weather.api.weather.domain.Units;
 import site.weather.api.weather.dto.response.WeatherResponse;
-import site.weather.api.weather.error.exception.WeatherException;
+import site.weather.api.weather.error.exception.BadWebClientRequestException;
 
 @Slf4j
 public class WeatherWebClient {
@@ -32,19 +31,13 @@ public class WeatherWebClient {
 				.queryParam("units", Units.METRIC)
 				.build())
 			.retrieve()
-			.onStatus(HttpStatusCode::is4xxClientError, response -> {
-				HttpStatusCode statusCode = response.statusCode();
-				if (statusCode == HttpStatus.UNAUTHORIZED) {
-					return Mono.error(new WeatherException(statusCode, "invalid API key"));
-				}
-				if (statusCode == HttpStatus.NOT_FOUND) {
-					return Mono.error(new WeatherException(statusCode, "not found city " + city));
-				}
-				if (statusCode == HttpStatus.TOO_MANY_REQUESTS) {
-					return Mono.error(new WeatherException(statusCode, "too many request"));
-				}
-				return response.createError();
-			})
+			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(new BadWebClientRequestException(
+				response.statusCode().value(),
+				String.format(
+					"An external request error with a 4xx status code. statusCode: %s, response:%s, header: %s",
+					response.statusCode().value(), response.bodyToMono(String.class),
+					response.headers().asHttpHeaders())
+			)))
 			.bodyToMono(WeatherResponse.class)
 			.log();
 	}
