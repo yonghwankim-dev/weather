@@ -20,10 +20,8 @@ public class WeatherErrorResponse {
 	public static WeatherErrorResponse from(Throwable throwable) {
 		if (throwable instanceof BadWebClientRequestException requestException) {
 			return requestException.toErrorResponse();
-		} else if (throwable instanceof WebClientResponseException responseException) {
-			return responseException.toErrorResponse();
 		}
-		return new WeatherErrorResponse(0, throwable.getMessage());
+		return ((WebClientResponseException)throwable).toErrorResponse();
 	}
 
 	@Override
