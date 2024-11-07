@@ -85,8 +85,8 @@ class CityWebClientTest {
 		Mono<List<City>> source = client.fetchCityBy(city);
 		// then
 		List<City> expected = List.of(
-			new City("KR", "", "Seoul", 37.5666791, 126.9782914),
-			new City("MX", "Chiapas", "Seoul", 16.1482357, -93.1950796)
+			new City("KR", "", "Seoul"),
+			new City("MX", "Chiapas", "Seoul")
 		);
 		StepVerifier.create(source)
 			.expectNext(expected)

@@ -12,16 +12,10 @@ public class City {
 	private String state;
 	@JsonProperty("name")
 	private final String name;
-	@JsonProperty("lat")
-	private final double lat;
-	@JsonProperty("lon")
-	private final double lon;
 
-	public City(String country, String state, String name, double lat, double lon) {
+	public City(String country, String state, String name) {
 		this.country = country;
 		this.state = state;
 		this.name = name;
-		this.lat = lat;
-		this.lon = lon;
 	}
 }

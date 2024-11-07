@@ -20,8 +20,6 @@ public class CityDeserializer extends JsonDeserializer<City> {
 		JsonNode stateNode = jsonNode.get("state");
 		String state = stateNode == null ? Strings.EMPTY : stateNode.asText(Strings.EMPTY);
 		String name = jsonNode.get("name").asText();
-		double lat = jsonNode.get("lat").asDouble();
-		double lon = jsonNode.get("lon").asDouble();
-		return new City(country, state, name, lat, lon);
+		return new City(country, state, name);
 	}
 }
