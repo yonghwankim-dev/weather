@@ -110,50 +110,70 @@
 </form>
 
 
-<div id="result"></div>
+<div id="cityList" class="city-list"></div>
 
 <script>
     let stompClient;
-    let subscription;
+    let subscriptions = {};  // 구독을 관리할 객체
 
     async function getWeather() {
+        const cityInput = document.querySelector("#city");
+        const city = cityInput.value.trim();
+        if (!city) return;
+
+        // 이미 구독 중인 도시인지 확인
+        if (subscriptions[city]) {
+            alert(`${city}는 이미 구독 중입니다.`);
+            return;
+        }
+
         const socket = new SockJS('/ws/weather');
         stompClient = Stomp.over(socket);
-        const city = document.querySelector("#city").value;
 
         stompClient.connect({}, () => {
-            if (subscription) {
-                subscription.unsubscribe();
-            }
-            subscription = stompClient.subscribe('/topic/weather/' + city, (message) => {
-                const resultDiv = document.querySelector("#result");
+            const subscription = stompClient.subscribe(`/topic/weather/${city}`, (message) => {
+                const resultDiv = document.createElement('div');
                 const weatherData = JSON.parse(message.body);
+                resultDiv.classList.add('weather-info');
                 if (weatherData.error) {
-                    subscription.unsubscribe();
                     resultDiv.innerHTML = `<p class="error-message">Error: ${weatherData.error}</p>`;
-                    resultDiv.style.display = 'block';
                 } else {
                     resultDiv.innerHTML = `
-                    <div class="weather-info">
                         <p>City: ${weatherData.name}</p>
                         <p>Temperature: ${weatherData.temperature}°C</p>
-                    </div>
-                `;
-                    resultDiv.style.display = 'block';
+                    `;
                 }
+
+                // 구독 해제 버튼 추가
+                const unsubscribeButton = document.createElement('button');
+                unsubscribeButton.classList.add('cancel-button');
+                unsubscribeButton.innerText = 'Unsubscribe';
+                unsubscribeButton.onclick = () => unsubscribeCity(city, resultDiv);
+
+                console.log("resultDiv", resultDiv);
+                resultDiv.appendChild(unsubscribeButton);
+                document.getElementById("cityList").appendChild(resultDiv);
+
+                // 구독 상태 저장
+                subscriptions[city] = subscription;
             });
 
-            // 특정 도시를 구독
+            // 서버에 도시 구독 요청
             stompClient.send("/app/weather", {}, city);
         });
     }
 
-    async function cancelWeather() {
-        if (subscription) {
-            await subscription.unsubscribe();
-            console.log("Unsubscribed from the weather topic.");
-            subscription = null; // 구독 ID 초기화
+    function unsubscribeCity(city, resultDiv) {
+        if (subscriptions[city]) {
+            subscriptions[city].unsubscribe();
+            delete subscriptions[city];
+            resultDiv.remove();
+            alert(`${city} 구독이 해제되었습니다.`);
         }
+    }
+
+    async function cancelWeather() {
+        // 현재 도시 구독을 해제할 수 있는 로직 추가 (선택된 도시만)
     }
 
     async function searchCity() {
