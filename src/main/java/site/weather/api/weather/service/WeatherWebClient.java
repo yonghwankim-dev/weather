@@ -29,7 +29,7 @@ public class WeatherWebClient {
 
 	@Cacheable(value = "weatherCache", key = "#city")
 	public Mono<WeatherResponse> fetchWeatherByCity(String city) {
-		log.info("call fetchWeatherByCity, city={}", city);
+		log.info("city: {}", city);
 		return webClient.get()
 			.uri(uriBuilder -> uriBuilder
 				.path("/data/2.5/weather")
