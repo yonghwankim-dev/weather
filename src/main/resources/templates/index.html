@@ -10,71 +10,88 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            margin-top: 50px;
-            color: #333;
+            height: 100vh;
+            margin: 0;
         }
 
-        h1 {
-            color: #2c3e50;
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 20px;
+        #weatherForm {
+            background-color: #fff;
+            border-radius: 8px;
             padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background-color: #f9f9f9;
-            width: 300px;
-        }
-
-        label {
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-
-        input[type="text"] {
-            padding: 8px;
-            width: 100%;
-            font-size: 1em;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 1em;
-            color: #fff;
-            background-color: #3498db;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: #2980b9;
-        }
-
-        #result {
-            margin-top: 20px;
-            font-size: 1.2em;
-            color: #333;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background-color: #f4f4f4;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             width: 300px;
             text-align: center;
         }
 
-        #result p {
+        label {
+            font-size: 16px;
+            color: #333;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        button {
+            width: 48%;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .cancel-button {
+            background-color: #f44336;
+        }
+
+        .cancel-button:hover {
+            background-color: #e53935;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #fff;
+            width: 300px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: none; /* 기본적으로 숨겨짐 */
+            text-align: left;
+            font-size: 16px;
+        }
+
+        .error-message {
+            color: #f44336;
+            font-weight: bold;
+        }
+
+        .weather-info {
+            color: #333;
+        }
+
+        .weather-info p {
             margin: 5px 0;
         }
     </style>
@@ -85,10 +102,10 @@
 
 <h1>Weather Information</h1>
 <form id="weatherForm">
-    <label for="city">Enter City Name:</label>
-    <input type="text" id="city" name="city" value="Seoul" required>
+    <label for="city">Select City:</label>
+    <input id="city" name="city" value="Seoul" required/>
     <button type="button" onclick="getWeather()">Get Weather</button>
-    <button type="button" onclick="cancelWeather()">Cancel</button>
+    <button type="button" class="cancel-button" onclick="cancelWeather()">Cancel</button>
 </form>
 
 
@@ -108,16 +125,20 @@
                 subscription.unsubscribe();
             }
             subscription = stompClient.subscribe('/topic/weather/' + city, (message) => {
+                const resultDiv = document.querySelector("#result");
                 const weatherData = JSON.parse(message.body);
                 if (weatherData.error) {
                     subscription.unsubscribe();
-                    document.querySelector("#result").innerHTML = `
-                    <p>Error: ${weatherData.error}</p>
-                `;
+                    resultDiv.innerHTML = `<p class="error-message">Error: ${weatherData.error}</p>`;
+                    resultDiv.style.display = 'block';
                 } else {
-                    document.querySelector("#result").innerHTML = `
-                <p>City: ${weatherData.name}</p>
-                <p>Temperature: ${weatherData.temperature}°C</p>`;
+                    resultDiv.innerHTML = `
+                    <div class="weather-info">
+                        <p>City: ${weatherData.name}</p>
+                        <p>Temperature: ${weatherData.temperature}°C</p>
+                    </div>
+                `;
+                    resultDiv.style.display = 'block';
                 }
             });
 
