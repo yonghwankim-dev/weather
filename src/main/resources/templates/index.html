@@ -103,9 +103,10 @@
 <h1>Weather Information</h1>
 <form id="weatherForm">
     <label for="city">Select City:</label>
-    <input id="city" name="city" value="Seoul" required/>
+    <input id="city" name="city" value="Seoul" required oninput="searchCity()"/>
     <button type="button" onclick="getWeather()">Get Weather</button>
     <button type="button" class="cancel-button" onclick="cancelWeather()">Cancel</button>
+    <div id="cityDropdown" class="city-dropdown"></div>
 </form>
 
 
@@ -152,6 +153,37 @@
             await subscription.unsubscribe();
             console.log("Unsubscribed from the weather topic.");
             subscription = null; // 구독 ID 초기화
+        }
+    }
+
+    async function searchCity() {
+        const cityInput = document.querySelector("#city");
+        const searchQuery = cityInput.value.trim();
+
+        if (searchQuery.length < 2) {
+            document.getElementById("cityDropdown").style.display = 'none';
+            return;
+        }
+
+        const response = await fetch(`/api/city?search=${searchQuery}`);
+        const cities = await response.json();
+        const dropdown = document.getElementById("cityDropdown");
+        dropdown.innerHTML = '';
+
+        console.log("cities :", cities);
+        if (cities.length > 0) {
+            cities.forEach(city => {
+                const cityDiv = document.createElement('div');
+                cityDiv.textContent = city.country + ' ' + city.state + ' ' + city.name;
+                cityDiv.onclick = () => {
+                    cityInput.value = city.name;
+                    dropdown.style.display = 'none';
+                };
+                dropdown.appendChild(cityDiv);
+            });
+            dropdown.style.display = 'block';
+        } else {
+            dropdown.style.display = 'none';
         }
     }
 </script>
