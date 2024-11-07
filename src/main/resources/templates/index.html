@@ -188,7 +188,6 @@
     <label for="city">Select City:</label>
     <input id="city" name="city" value="Seoul" required oninput="searchCity()"/>
     <button type="button" onclick="getWeather()">Get Weather</button>
-    <button type="button" class="cancel-button" onclick="cancelWeather()">Cancel</button>
     <div id="cityDropdown" class="city-dropdown"></div>
 </form>
 
@@ -256,10 +255,6 @@
             resultDiv.remove();
             alert(`${city} 구독이 해제되었습니다.`);
         }
-    }
-
-    async function cancelWeather() {
-        // 현재 도시 구독을 해제할 수 있는 로직 추가 (선택된 도시만)
     }
 
     async function searchCity() {
