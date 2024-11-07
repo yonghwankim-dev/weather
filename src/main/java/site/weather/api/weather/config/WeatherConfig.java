@@ -36,7 +36,7 @@ public class WeatherConfig implements WebSocketMessageBrokerConfigurer {
 				configurer.defaultCodecs().jackson2JsonDecoder(new Jackson2JsonDecoder(objectMapper));
 			})
 			.build();
-		return new WeatherWebClient(webClient, appid);
+		return new WeatherWebClient(webClient, appid, objectMapper);
 	}
 
 	@Override
