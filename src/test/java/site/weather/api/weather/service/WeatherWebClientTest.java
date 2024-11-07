@@ -94,7 +94,7 @@ class WeatherWebClientTest {
 		// when
 		Mono<WeatherResponse> source = client.fetchWeatherByCity(city);
 		// then
-		WeatherResponse expected = WeatherResponse.ok("Seoul", 24.66);
+		WeatherResponse expected = WeatherResponse.of("Seoul", 24.66);
 		StepVerifier.create(source)
 			.expectNext(expected)
 			.verifyComplete();
@@ -116,7 +116,7 @@ class WeatherWebClientTest {
 			.flatMap(Mono::flux)
 			.publishOn(Schedulers.boundedElastic());
 		// then
-		WeatherResponse expected = WeatherResponse.ok("Seoul", 24.66);
+		WeatherResponse expected = WeatherResponse.of("Seoul", 24.66);
 		StepVerifier.create(source)
 			.expectNext(expected)
 			.verifyComplete();
