@@ -29,6 +29,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 import site.weather.api.weather.dto.response.WeatherResponse;
+import site.weather.api.weather.error.exception.BadWebClientRequestException;
 import site.weather.api.weather.repository.WeatherSubscriptionInfoRepository;
 
 @SpringBootTest
@@ -46,8 +47,8 @@ class WeatherWebClientTest {
 	@Autowired
 	private WeatherSubscriptionInfoRepository repository;
 
-	private static String getWeatherJson() {
-		ClassPathResource resource = new ClassPathResource("weather.json");
+	private static String getOpenWeatherResponseJson(String path) {
+		ClassPathResource resource = new ClassPathResource(path);
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(resource.getInputStream()))) {
 			return br.lines()
 				.collect(Collectors.joining());
@@ -70,7 +71,7 @@ class WeatherWebClientTest {
 				configurer.defaultCodecs().jackson2JsonEncoder(new Jackson2JsonEncoder(objectMapper));
 				configurer.defaultCodecs().jackson2JsonDecoder(new Jackson2JsonDecoder(objectMapper));
 			})
-			.build(), appid);
+			.build(), appid, objectMapper);
 	}
 
 	@AfterEach
@@ -85,7 +86,7 @@ class WeatherWebClientTest {
 		MockResponse mockResponse = new MockResponse()
 			.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
 			.setResponseCode(200)
-			.setBody(getWeatherJson());
+			.setBody(getOpenWeatherResponseJson("weather.json"));
 		mockWebServer.enqueue(mockResponse);
 
 		String city = "Seoul";
@@ -105,7 +106,7 @@ class WeatherWebClientTest {
 		MockResponse mockResponse = new MockResponse()
 			.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
 			.setResponseCode(200)
-			.setBody(getWeatherJson());
+			.setBody(getOpenWeatherResponseJson("weather.json"));
 		mockWebServer.enqueue(mockResponse);
 
 		String city = "Seoul";
@@ -124,7 +125,11 @@ class WeatherWebClientTest {
 	@Test
 	void givenNotFoundCityName_whenResponseError_thenReturnErrorMono() {
 		// given
-		MockResponse mockResponse = new MockResponse().setResponseCode(404);
+		MockResponse mockResponse = new MockResponse()
+			.setResponseCode(404)
+			.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+			.setBody(getOpenWeatherResponseJson("404.json"));
+
 		mockWebServer.enqueue(mockResponse);
 
 		String city = "awoiejfaoiwejf";
@@ -132,9 +137,10 @@ class WeatherWebClientTest {
 		Mono<WeatherResponse> source = client.fetchWeatherByCity(city);
 
 		// then
-		String expected = String.format("not found city %s", city);
+		String expected = "city not found";
 		StepVerifier.create(source)
-			.expectErrorMessage(expected)
+			.expectErrorMatches(throwable -> throwable instanceof BadWebClientRequestException exception
+				&& exception.getStatusCode() == 404 && exception.getRawMessage().equals(expected))
 			.verify();
 		Assertions.assertThat(repository.findAllCities()).isEmpty();
 	}
@@ -143,7 +149,9 @@ class WeatherWebClientTest {
 	@Test
 	void givenCityName_whenResponse401Error_thenReturnErrorMono() {
 		// given
-		MockResponse mockResponse = new MockResponse().setResponseCode(401);
+		MockResponse mockResponse = new MockResponse().setResponseCode(401)
+			.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+			.setBody(getOpenWeatherResponseJson("401.json"));
 		mockWebServer.enqueue(mockResponse);
 
 		String city = "Seoul";
@@ -152,7 +160,8 @@ class WeatherWebClientTest {
 		// then
 		String expected = "invalid API key";
 		StepVerifier.create(source)
-			.expectErrorMessage(expected)
+			.expectErrorMatches(throwable -> throwable instanceof BadWebClientRequestException exception
+				&& exception.getStatusCode() == 401 && exception.getRawMessage().equals(expected))
 			.verify();
 	}
 }
