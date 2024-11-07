@@ -1,28 +1,26 @@
 package site.weather.api.weather.error.dto;
 
-import org.springframework.http.HttpStatusCode;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import site.weather.api.weather.error.exception.WeatherException;
+import site.weather.api.weather.error.exception.BadWebClientRequestException;
 
 public class WeatherErrorResponse {
 	@JsonProperty("httpStatusCode")
-	private final HttpStatusCode httpStatusCode;
+	private final int httpStatusCode;
 
 	@JsonProperty("error")
 	private final String error;
 
-	public WeatherErrorResponse(HttpStatusCode httpStatusCode, String error) {
+	public WeatherErrorResponse(int httpStatusCode, String error) {
 		this.httpStatusCode = httpStatusCode;
 		this.error = error;
 	}
 
 	public static WeatherErrorResponse from(Throwable throwable) {
-		if (throwable instanceof WeatherException exception) {
-			return exception.toResponse();
+		if (throwable instanceof BadWebClientRequestException exception) {
+			return exception.toErrorResponse();
 		}
-		return new WeatherErrorResponse(null, throwable.getMessage());
+		return new WeatherErrorResponse(500, throwable.getMessage());
 	}
 
 	@Override

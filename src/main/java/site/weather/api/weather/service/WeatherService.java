@@ -2,6 +2,7 @@ package site.weather.api.weather.service;
 
 import java.util.Set;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +12,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import site.weather.api.weather.dto.response.WeatherResponse;
 import site.weather.api.weather.error.dto.WeatherErrorResponse;
-import site.weather.api.weather.error.exception.WeatherException;
+import site.weather.api.weather.error.exception.BadWebClientRequestException;
 import site.weather.api.weather.repository.WeatherSubscriptionInfoRepository;
 
 @Service
@@ -37,7 +38,8 @@ public class WeatherService {
 	}
 
 	private boolean isNotFoundCityResponse(Throwable throwable) {
-		return throwable instanceof WeatherException exception && exception.is404Error();
+		return throwable instanceof BadWebClientRequestException exception && exception.hasStatusCode(
+			HttpStatus.NOT_FOUND);
 	}
 
 	private String destination(String city) {
