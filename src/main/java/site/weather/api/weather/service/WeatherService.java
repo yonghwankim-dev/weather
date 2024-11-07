@@ -38,8 +38,8 @@ public class WeatherService {
 	}
 
 	private boolean isNotFoundCityResponse(Throwable throwable) {
-		return throwable instanceof BadWebClientRequestException exception && exception.hasStatusCode(
-			HttpStatus.NOT_FOUND);
+		return throwable instanceof BadWebClientRequestException exception
+			&& exception.hasStatusCode(HttpStatus.NOT_FOUND);
 	}
 
 	private String destination(String city) {

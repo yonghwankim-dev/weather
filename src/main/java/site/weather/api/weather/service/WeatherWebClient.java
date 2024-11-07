@@ -13,6 +13,7 @@ import reactor.core.publisher.Mono;
 import site.weather.api.weather.domain.Units;
 import site.weather.api.weather.dto.response.WeatherResponse;
 import site.weather.api.weather.error.exception.BadWebClientRequestException;
+import site.weather.api.weather.error.exception.WebClientResponseException;
 
 @Slf4j
 public class WeatherWebClient {
@@ -40,7 +41,7 @@ public class WeatherWebClient {
 			.onStatus(HttpStatusCode::is4xxClientError, response ->
 				response.bodyToMono(String.class)
 					.flatMap(errorBody -> {
-						log.info("errorBody : {}", errorBody);
+						log.info("errorBody: {}", errorBody);
 						return Mono.error(new BadWebClientRequestException(
 							response.statusCode().value(),
 							parseMessage(errorBody),
@@ -50,6 +51,19 @@ public class WeatherWebClient {
 								response.bodyToMono(String.class),
 								response.headers().asHttpHeaders()
 							)
+						));
+					}))
+			.onStatus(HttpStatusCode::is5xxServerError, response ->
+				response.bodyToMono(String.class)
+					.flatMap(errorBody -> {
+						log.info("errorBody: {}", errorBody);
+						return Mono.error(new WebClientResponseException(
+							response.statusCode().value(),
+							parseMessage(errorBody),
+							String.format("5xx external system error. statusCode: %s, response: %s, header: %s",
+								response.statusCode().value(),
+								response.bodyToMono(String.class),
+								response.headers().asHttpHeaders())
 						));
 					}))
 			.bodyToMono(WeatherResponse.class)

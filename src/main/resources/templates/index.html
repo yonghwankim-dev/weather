@@ -109,11 +109,8 @@
             }
             subscription = stompClient.subscribe('/topic/weather/' + city, (message) => {
                 const weatherData = JSON.parse(message.body);
-                if (weatherData.httpStatusCode === 'NOT_FOUND') {
-                    subscription.unsubscribe();
-                }
                 if (weatherData.error) {
-                    // 서버에서 에러 메시지가 온 경우
+                    subscription.unsubscribe();
                     document.querySelector("#result").innerHTML = `
                     <p>Error: ${weatherData.error}</p>
                 `;
