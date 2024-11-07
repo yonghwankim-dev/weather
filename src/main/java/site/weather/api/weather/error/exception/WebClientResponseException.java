@@ -1,7 +1,9 @@
 package site.weather.api.weather.error.exception;
 
+import lombok.Getter;
 import site.weather.api.weather.error.dto.WeatherErrorResponse;
 
+@Getter
 public class WebClientResponseException extends RuntimeException {
 	private final int statusCode;
 	private final String rawMessage;

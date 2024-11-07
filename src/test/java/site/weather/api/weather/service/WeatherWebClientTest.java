@@ -30,6 +30,7 @@ import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 import site.weather.api.weather.dto.response.WeatherResponse;
 import site.weather.api.weather.error.exception.BadWebClientRequestException;
+import site.weather.api.weather.error.exception.WebClientResponseException;
 import site.weather.api.weather.repository.WeatherSubscriptionInfoRepository;
 
 @SpringBootTest
@@ -162,6 +163,26 @@ class WeatherWebClientTest {
 		StepVerifier.create(source)
 			.expectErrorMatches(throwable -> throwable instanceof BadWebClientRequestException exception
 				&& exception.getStatusCode() == 401 && exception.getRawMessage().equals(expected))
+			.verify();
+	}
+
+	@DisplayName("날씨 조회시 서버로부터 500 응답을 받으면 에러를 응답한다")
+	@Test
+	void givenCityName_whenResponse500Error_thenReturnErrorMono() {
+		// given
+		MockResponse mockResponse = new MockResponse().setResponseCode(500)
+			.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+			.setBody(getOpenWeatherResponseJson("500.json"));
+		mockWebServer.enqueue(mockResponse);
+
+		String city = "Seoul";
+		// when
+		Mono<WeatherResponse> source = client.fetchWeatherByCity(city);
+		// then
+		String expected = "internal server error";
+		StepVerifier.create(source)
+			.expectErrorMatches(throwable -> throwable instanceof WebClientResponseException exception
+				&& exception.getStatusCode() == 500 && exception.getRawMessage().equals(expected))
 			.verify();
 	}
 }
