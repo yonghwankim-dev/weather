@@ -14,7 +14,7 @@ public class City {
 	private final String name;
 	@JsonProperty("lat")
 	private final double lat;
-	@JsonProperty("len")
+	@JsonProperty("lon")
 	private final double lon;
 
 	public City(String country, String state, String name, double lat, double lon) {
