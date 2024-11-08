@@ -2,8 +2,54 @@ body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f9;
     margin: 0;
+    padding: 0;
 }
 
-#city {
-    width: 300px;
+.header {
+    background-color: #333; /* 배경색 설정 */
+    color: #fff; /* 텍스트 색상 설정 */
+    padding: 15px 0; /* 위아래 여백 */
+    position: fixed; /* 상단 고정 */
+    top: 0;
+    width: 100%;
+    z-index: 1000; /* 다른 요소들 위로 올림 */
+    text-align: left; /* 텍스트 왼쪽 정렬 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* 약간의 그림자 */
+}
+
+.header_column h4 {
+    /* h4 요소의 기본 마진 제거 */
+    margin: 0 0 0 12px;
+    font-size: 24px; /* 텍스트 크기 설정 */
+    font-weight: bold; /* 텍스트 굵기 설정 */
+    letter-spacing: 1px; /* 글자 간격 조정 */
+}
+
+/* 본문 컨텐츠 아래 여백 */
+.nav,
+.section,
+.city-dropdown {
+    margin-top: 80px; /* 헤더 높이만큼 여백 추가 */
+}
+
+#cityLabel {
+    padding-left: 12px;
+}
+
+#cityList {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px; /* 테이블과 검색창 간의 간격 */
+}
+
+#cityTable {
+    width: 100%;
+}
+
+#cityTable th, #cityTable td {
+    text-align: center; /* 테이블 텍스트 중앙 정렬 */
+}
+
+.nav .col-md-6 {
+    padding: 0 10px; /* 각 컬럼 간의 간격 */
 }
