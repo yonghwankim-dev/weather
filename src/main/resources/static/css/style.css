@@ -1,0 +1,104 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 0;
+}
+
+.header {
+    background-color: #333; /* 배경색 설정 */
+    color: #fff; /* 텍스트 색상 설정 */
+    padding: 15px 0; /* 위아래 여백 */
+    position: fixed; /* 상단 고정 */
+    top: 0;
+    width: 100%;
+    z-index: 1000; /* 다른 요소들 위로 올림 */
+    text-align: left; /* 텍스트 왼쪽 정렬 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* 약간의 그림자 */
+}
+
+.header_column h4 {
+    /* h4 요소의 기본 마진 제거 */
+    margin: 0 0 0 12px;
+    font-size: 24px; /* 텍스트 크기 설정 */
+    font-weight: bold; /* 텍스트 굵기 설정 */
+    letter-spacing: 1px; /* 글자 간격 조정 */
+}
+
+/* 본문 컨텐츠 아래 여백 */
+.nav,
+.section {
+    margin-top: 80px; /* 헤더 높이만큼 여백 추가 */
+}
+
+#cityLabel {
+    padding-left: 12px;
+}
+
+#cityList {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px; /* 테이블과 검색창 간의 간격 */
+}
+
+#cityTable {
+    width: 100%;
+}
+
+#cityTable th, #cityTable td {
+    text-align: center; /* 테이블 텍스트 중앙 정렬 */
+}
+
+.nav .col-md-6 {
+    padding: 0 10px; /* 각 컬럼 간의 간격 */
+}
+
+.cancel-button {
+    background-color: #dc3545; /* 버튼 배경색 (Red) */
+    color: white; /* 글자색 */
+    border: none; /* 기본 테두리 제거 */
+    padding: 5px 10px; /* 패딩 */
+    font-size: 14px; /* 글자 크기 */
+    border-radius: 5px; /* 모서리 둥글게 */
+    cursor: pointer; /* 마우스 커서 pointer로 변경 */
+    transition: background-color 0.3s ease; /* 배경색 변경 시 부드러운 효과 */
+}
+
+.cancel-button:hover {
+    background-color: #c82333; /* 마우스 오버 시 배경색 변경 (좀 더 어두운 빨강) */
+}
+
+.cancel-button:focus {
+    outline: none; /* 클릭 시 outline 제거 */
+}
+
+/* 자동완성 드롭다운 스타일 */
+.city-dropdown {
+    position: absolute;
+    top: 100%; /* 검색창 바로 아래에 위치 */
+    left: 0;
+    width: 97%;
+    margin-left: 24px;
+    max-height: 200px; /* 최대 높이 제한 */
+    overflow-y: auto; /* 스크롤 가능 */
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-top: none;
+    z-index: 1000; /* 검색창 위로 표시 */
+    display: none; /* 기본적으로 숨김 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.city-dropdown .dropdown-item {
+    padding: 8px 10px;
+    cursor: pointer;
+}
+
+.city-dropdown .dropdown-item:hover {
+    background-color: #f1f1f1;
+}
+
+/* 검색창 부모 요소에 position: relative 추가 */
+.nav .col-md-10 {
+    position: relative;
+}
