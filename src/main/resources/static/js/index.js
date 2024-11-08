@@ -16,46 +16,54 @@ async function getWeather() {
     stompClient = Stomp.over(socket);
 
     stompClient.connect({}, () => {
-        // 도시 날씨 컴포넌트 생성
-        const resultDiv = document.createElement('div');
+        // 테이블에 도시 구독 컴포넌트 추가
+        const tableBody = document.querySelector("#cityTable tbody");
+        const newRow = createNewCityRow(city, tableBody.rows.length);
+        // 새로운 행을 테이블에 추가
+        tableBody.appendChild(newRow);
 
         // 도시 구독 설정
         const subscription = stompClient.subscribe(`/topic/weather/${city}`, (message) => {
             const weatherData = JSON.parse(message.body);
-            resultDiv.classList.add('weather-info');
+
+            // 온도 데이터 업데이트
+            const temperatureCell = document.querySelector(`#temperature-${city}`);
             if (weatherData.error) {
-                resultDiv.innerHTML = `<p class="error-message">Error: ${weatherData.error}</p>`;
+                temperatureCell.innerHTML = `<span class="error-message">${weatherData.error}</span>`;
             } else {
-                resultDiv.innerHTML = `
-                        <p>City: ${weatherData.name}</p>
-                        <p>Temperature: ${weatherData.temperature}°C</p>
-                    `;
+                temperatureCell.innerHTML = `${weatherData.temperature}°C`;
             }
-
-            // 구독 해제 버튼 추가
-            const unsubscribeButton = document.createElement('button');
-            unsubscribeButton.classList.add('cancel-button');
-            unsubscribeButton.innerText = 'X';
-            unsubscribeButton.onclick = () => unsubscribeCity(city, resultDiv);
-
-            resultDiv.appendChild(unsubscribeButton);
 
             // 구독 상태 저장
             subscriptions[city] = subscription;
         });
-
-        document.getElementById("cityList").appendChild(resultDiv);
-
         // 서버에 도시 구독 요청
         stompClient.send("/app/weather", {}, city);
     });
 }
 
-function unsubscribeCity(city, resultDiv) {
+function createNewCityRow(city, len) {
+    const newRow = document.createElement('tr');
+    const newIndex = len + 1;
+    newRow.innerHTML = `
+        <th scope="row">${newIndex}</th>
+        <td>${city}</td>
+        <td id="temperature-${city}">0°C</td>
+        <td><button class="cancel-button" onclick="unsubscribeCity('${city}')">X</button></td>
+        `;
+    return newRow;
+}
+
+function unsubscribeCity(city) {
     if (subscriptions[city]) {
+        // 구독 해제
         subscriptions[city].unsubscribe();
         delete subscriptions[city];
-        resultDiv.remove();
+
+        // 해당 도시 행을 테이블에서 삭제
+        const row = document.querySelector(`#temperature-${city}`).closest('tr');
+        row.remove();
+
         alert(`${city} 구독이 해제되었습니다.`);
     }
 }
