@@ -69,31 +69,35 @@ function unsubscribeCity(city) {
 }
 
 async function searchCity() {
-    const cityInput = document.querySelector("#city");
-    const searchQuery = cityInput.value.trim();
+    const input = document.querySelector("#city");
+    const cityDropdown = document.querySelector("#cityDropdown");
+    const query = input.value.trim();
 
-    if (searchQuery.length < 2) {
-        document.getElementById("cityDropdown").style.display = 'none';
+    if (query.length < 2) {
+        // 입력 2자리 미만이면 드롭다운 숨김
+        document.querySelector("#cityDropdown").style.display = 'none';
         return;
     }
 
-    const response = await fetch(`/api/city?search=${searchQuery}`);
+    const response = await fetch(`/api/city?search=${query}`);
     const cities = await response.json();
-    const dropdown = document.getElementById("cityDropdown");
-    dropdown.innerHTML = '';
 
     if (cities.length > 0) {
+        cityDropdown.innerHTML = '';
         cities.forEach(city => {
-            const cityDiv = document.createElement('div');
-            cityDiv.textContent = city.country + ' ' + city.state + ' ' + city.name;
-            cityDiv.onclick = () => {
-                cityInput.value = city.name;
-                dropdown.style.display = 'none';
-            };
-            dropdown.appendChild(cityDiv);
+            const item = document.createElement('div');
+            item.classList.add('dropdown-item');
+            item.textContent = `${city.country} ${city.state} ${city.name}`;
+            item.onclick = () => selectCity(city);
+            cityDropdown.appendChild(item);
         });
-        dropdown.style.display = 'block';
+        cityDropdown.style.display = 'block'; // 드롭다운 보이기
     } else {
-        dropdown.style.display = 'none';
+        cityDropdown.style.display = 'none'; // 데이터가 없으면 드롭다운 숨김
     }
+}
+
+function selectCity(city) {
+    document.querySelector('#city').value = city.name;
+    document.querySelector('#cityDropdown').style.display = 'none'; // 드롭다운 숨김
 }
