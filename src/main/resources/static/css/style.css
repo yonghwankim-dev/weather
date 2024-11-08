@@ -27,8 +27,7 @@ body {
 
 /* 본문 컨텐츠 아래 여백 */
 .nav,
-.section,
-.city-dropdown {
+.section {
     margin-top: 80px; /* 헤더 높이만큼 여백 추가 */
 }
 
@@ -71,4 +70,35 @@ body {
 
 .cancel-button:focus {
     outline: none; /* 클릭 시 outline 제거 */
+}
+
+/* 자동완성 드롭다운 스타일 */
+.city-dropdown {
+    position: absolute;
+    top: 100%; /* 검색창 바로 아래에 위치 */
+    left: 0;
+    width: 97%;
+    margin-left: 24px;
+    max-height: 200px; /* 최대 높이 제한 */
+    overflow-y: auto; /* 스크롤 가능 */
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-top: none;
+    z-index: 1000; /* 검색창 위로 표시 */
+    display: none; /* 기본적으로 숨김 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.city-dropdown .dropdown-item {
+    padding: 8px 10px;
+    cursor: pointer;
+}
+
+.city-dropdown .dropdown-item:hover {
+    background-color: #f1f1f1;
+}
+
+/* 검색창 부모 요소에 position: relative 추가 */
+.nav .col-md-10 {
+    position: relative;
 }
