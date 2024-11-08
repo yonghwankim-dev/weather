@@ -1,27 +1,61 @@
 let stompClient;
 let subscriptions = {};  // 구독을 관리할 객체
+let isConnected = false; // WebSocket 연결 상태를 추적
+
+
+// 페이지 로드 시 로컬 스토리지에서 구독한 도시를 불러옴
+window.onload = () => {
+    const savedCities = JSON.parse(localStorage.getItem("subscribedCities")) || [];
+    if (savedCities.length > 0) {
+        // WebSocket 연결 시도
+        connectWebSocket(() => {
+            savedCities.forEach(city => subscribeToCity(city));
+        });
+    }
+};
+
+function connectWebSocket(callback) {
+    if (isConnected) return callback(); // 이미 연결된 경우 바로 콜백 호출
+
+    const socket = new SockJS('/ws/weather');
+    stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, () => {
+        isConnected = true;
+        console.log("WebSocket 연결 성공");
+
+        // 연결 완료 후 콜백 실행
+        if (callback) callback();
+    });
+}
+
 
 async function getWeather() {
     const cityInput = document.querySelector("#city");
     const city = cityInput.value.trim();
     if (!city) return;
 
+    subscribeToCity(city);
+}
+
+function subscribeToCity(city) {
     // 이미 구독 중인 도시인지 확인
+    console.log(subscriptions);
     if (subscriptions[city]) {
         alert(`${city}는 이미 구독 중입니다.`);
         return;
     }
 
-    const socket = new SockJS('/ws/weather');
-    stompClient = Stomp.over(socket);
+    if (!stompClient || stompClient.connected === false) {
+        console.log('create SockJS /ws/weather');
+        const socket = new SockJS('/ws/weather');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, onConnected.bind(null, city));
+    } else {
+        onConnected(city);
+    }
 
-    stompClient.connect({}, () => {
-        // 테이블에 도시 구독 컴포넌트 추가
-        const tableBody = document.querySelector("#cityTable tbody");
-        const newRow = createNewCityRow(city, tableBody.rows.length);
-        // 새로운 행을 테이블에 추가
-        tableBody.appendChild(newRow);
-
+    function onConnected(city) {
         // 도시 구독 설정
         const subscription = stompClient.subscribe(`/topic/weather/${city}`, (message) => {
             const weatherData = JSON.parse(message.body);
@@ -39,7 +73,21 @@ async function getWeather() {
         });
         // 서버에 도시 구독 요청
         stompClient.send("/app/weather", {}, city);
-    });
+        console.log("send /app/weather/", city);
+
+        // 구독한 도시를 로컬 스토리지에 저장
+        const savedCities = JSON.parse(localStorage.getItem("subscribedCities")) || [];
+        if (!savedCities.includes(city)) {
+            savedCities.push(city);
+            localStorage.setItem("subscribedCities", JSON.stringify(savedCities));
+        }
+
+        // 테이블에 도시 구독 컴포넌트 추가
+        const tableBody = document.querySelector("#cityTable tbody");
+        const newRow = createNewCityRow(city, tableBody.rows.length);
+        // 새로운 행을 테이블에 추가
+        tableBody.appendChild(newRow);
+    }
 }
 
 function createNewCityRow(city, len) {
@@ -63,6 +111,11 @@ function unsubscribeCity(city) {
         // 해당 도시 행을 테이블에서 삭제
         const row = document.querySelector(`#temperature-${city}`).closest('tr');
         row.remove();
+
+        // 로컬 스토리지에서 해당 도시 제거
+        const savedCities = JSON.parse(localStorage.getItem("subscribedCities")) || [];
+        const updatedCities = savedCities.filter(c => c !== city);
+        localStorage.setItem("subscribedCities", JSON.stringify(updatedCities));
 
         alert(`${city} 구독이 해제되었습니다.`);
     }
