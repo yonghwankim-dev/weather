@@ -25,33 +25,43 @@
         <h4>Weather</h4>
     </div>
 </div>
-<div class="nav">
-    <div class="nav_column">
-        <label for="city">
-            <input id="city" name="city" placeholder="Weather in your city" value="Seoul" required
-                   oninput="searchCity()">
-        </label>
-        <button type="button" onclick="getWeather()">Search</button>
+<div class="nav container">
+    <div class="row w-100">
+        <div class="col-md-10">
+            <label id="cityLabel" for="city" class="w-100">
+                <input id="city" name="city" class="form-control w-100" placeholder="Weather in your city" value="Seoul"
+                       required
+                       oninput="searchCity()">
+            </label>
+        </div>
+        <div class="col-md-2 d-flex align-items-center">
+            <button type="button" class="btn btn-dark w-100" onclick="getWeather()">Search</button>
+        </div>
     </div>
 </div>
-<div class="section">
-    <div id="cityDropdown" class="city-dropdown"></div>
-    <div id="cityList" class="city-list">
-        <table id="cityTable" class="table">
-            <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">name</th>
-                <th scope="col">temperature</th>
-                <th scope="col">unsubscribe</th>
-            </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-    </div>
-</div>
+<div class="section container">
+    <div class="row">
+        <div class="col-md-12">
+            <div id="cityList" class="city-list">
+                <table id="cityTable" class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">name</th>
+                        <th scope="col">temperature</th>
+                        <th scope="col">unsubscribe</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
+    </div>
+
+</div>
+<div id="cityDropdown" class="city-dropdown"></div>
 
 <script src="/js/index.js"></script>
 
